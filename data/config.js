@@ -46,4 +46,17 @@ const SAMPLES = [
   { id:'water_lilies',       artist:'monet',     src:'assets/samples/water_lilies.jpg' },        // モネ「睡蓮」
   { id:'woman_parasol',      artist:'monet',     src:'assets/samples/woman_parasol.jpg' },       // モネ「日傘をさす女」
   { id:'impression_sunrise', artist:'monet',     src:'assets/samples/impression_sunrise.jpg' },  // モネ「印象・日の出」
+  // ---- 追加12点（2026-07-03・計24点）----
+  { id:'last_supper',        artist:'davinci',   src:'assets/samples/last_supper.jpg' },         // ダ・ヴィンチ「最後の晩餐」
+  { id:'birth_of_venus',     artist:'botticelli',src:'assets/samples/birth_of_venus.jpg' },      // ボッティチェリ「ヴィーナスの誕生」
+  { id:'kiss',               artist:'klimt',     src:'assets/samples/kiss.jpg' },                // クリムト「接吻」
+  { id:'liberty',            artist:'delacroix', src:'assets/samples/liberty.jpg' },             // ドラクロワ「民衆を導く自由の女神」
+  { id:'gleaners',           artist:'millet',    src:'assets/samples/gleaners.jpg' },            // ミレー「落穂拾い」
+  { id:'moulin_galette',     artist:'renoir',    src:'assets/samples/moulin_galette.jpg' },      // ルノワール「ムーラン・ド・ラ・ギャレットの舞踏会」
+  { id:'school_of_athens',   artist:'raphael',   src:'assets/samples/school_of_athens.jpg' },    // ラファエロ「アテナイの学堂」
+  { id:'red_fuji',           artist:'hokusai',   src:'assets/samples/red_fuji.jpg' },            // 北斎「凱風快晴（赤富士）」
+  { id:'mikaeri_bijin',      artist:'moronobu',  src:'assets/samples/mikaeri_bijin.jpg' },       // 菱川師宣「見返り美人図」
+  { id:'fujin_raijin',       artist:'sotatsu',   src:'assets/samples/fujin_raijin.jpg' },        // 俵屋宗達「風神雷神図屏風」
+  { id:'night_watch',        artist:'rembrandt', src:'assets/samples/night_watch.jpg' },         // レンブラント「夜警」
+  { id:'las_meninas',        artist:'velazquez', src:'assets/samples/las_meninas.jpg' },         // ベラスケス「ラス・メニーナス」
 ];

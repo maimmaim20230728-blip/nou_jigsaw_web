@@ -31,18 +31,19 @@ const LEVELS = [
 ];
 
 /* ---- サンプル画像（パブリックドメインの名画12点・Wikimedia Commonsの忠実複製より） ----
-   すべて作者没後70年超のPD。平面美術の忠実複製写真に新たな著作権は発生しない(PD-Art) */
+   すべて作者没後70年超のPD。平面美術の忠実複製写真に新たな著作権は発生しない(PD-Art)
+   タイトル・作者名の15言語訳は data/lang.js の ART（LANG[code].art）にある      */
 const SAMPLES = [
-  { id:'sunflowers',         src:'assets/samples/sunflowers.jpg' },          // ゴッホ「ひまわり」
-  { id:'starry_night',       src:'assets/samples/starry_night.jpg' },        // ゴッホ「星月夜」
-  { id:'cafe_terrace',       src:'assets/samples/cafe_terrace.jpg' },        // ゴッホ「夜のカフェテラス」
-  { id:'great_wave',         src:'assets/samples/great_wave.jpg' },          // 北斎「富嶽三十六景 神奈川沖浪裏」
-  { id:'tokaido_nihonbashi', src:'assets/samples/tokaido_nihonbashi.jpg' },  // 広重「東海道五十三次 日本橋」
-  { id:'scream',             src:'assets/samples/scream.jpg' },              // ムンク「叫び」
-  { id:'mona_lisa',          src:'assets/samples/mona_lisa.jpg' },           // ダ・ヴィンチ「モナ・リザ」
-  { id:'pearl_earring',      src:'assets/samples/pearl_earring.jpg' },       // フェルメール「真珠の耳飾りの少女」
-  { id:'milkmaid',           src:'assets/samples/milkmaid.jpg' },            // フェルメール「牛乳を注ぐ女」
-  { id:'water_lilies',       src:'assets/samples/water_lilies.jpg' },        // モネ「睡蓮」
-  { id:'woman_parasol',      src:'assets/samples/woman_parasol.jpg' },       // モネ「日傘をさす女」
-  { id:'impression_sunrise', src:'assets/samples/impression_sunrise.jpg' },  // モネ「印象・日の出」
+  { id:'sunflowers',         artist:'vangogh',   src:'assets/samples/sunflowers.jpg' },          // ゴッホ「ひまわり」
+  { id:'starry_night',       artist:'vangogh',   src:'assets/samples/starry_night.jpg' },        // ゴッホ「星月夜」
+  { id:'cafe_terrace',       artist:'vangogh',   src:'assets/samples/cafe_terrace.jpg' },        // ゴッホ「夜のカフェテラス」
+  { id:'great_wave',         artist:'hokusai',   src:'assets/samples/great_wave.jpg' },          // 北斎「富嶽三十六景 神奈川沖浪裏」
+  { id:'tokaido_nihonbashi', artist:'hiroshige', src:'assets/samples/tokaido_nihonbashi.jpg' },  // 広重「東海道五十三次 日本橋」
+  { id:'scream',             artist:'munch',     src:'assets/samples/scream.jpg' },              // ムンク「叫び」
+  { id:'mona_lisa',          artist:'davinci',   src:'assets/samples/mona_lisa.jpg' },           // ダ・ヴィンチ「モナ・リザ」
+  { id:'pearl_earring',      artist:'vermeer',   src:'assets/samples/pearl_earring.jpg' },       // フェルメール「真珠の耳飾りの少女」
+  { id:'milkmaid',           artist:'vermeer',   src:'assets/samples/milkmaid.jpg' },            // フェルメール「牛乳を注ぐ女」
+  { id:'water_lilies',       artist:'monet',     src:'assets/samples/water_lilies.jpg' },        // モネ「睡蓮」
+  { id:'woman_parasol',      artist:'monet',     src:'assets/samples/woman_parasol.jpg' },       // モネ「日傘をさす女」
+  { id:'impression_sunrise', artist:'monet',     src:'assets/samples/impression_sunrise.jpg' },  // モネ「印象・日の出」
 ];

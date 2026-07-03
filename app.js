@@ -77,11 +77,16 @@ async function pickFile(input){
   }
 }
 
-/* ===== サンプル（名画）選択 ===== */
+/* ===== サンプル（名画）選択（タイトル・作者は現在の言語で表示） ===== */
 function renderSamples(){
   const grid = document.getElementById('sampleGrid');
+  const art = I18N.art || LANG.en.art;
   grid.innerHTML = SAMPLES.map(s=>
-    '<button class="sample-btn" data-src="'+s.src+'"><img src="'+s.src+'" alt=""></button>'
+    '<button class="sample-btn" data-src="'+s.src+'">'+
+      '<img src="'+s.src+'" alt="'+(art[s.id]||'')+'">'+
+      '<span class="sample-t">'+(art[s.id]||'')+'</span>'+
+      '<span class="sample-a">'+(art[s.artist]||'')+'</span>'+
+    '</button>'
   ).join('');
   grid.querySelectorAll('.sample-btn').forEach(b=>{
     b.onclick = ()=>{ Sound.tap(); curImg = b.dataset.src; startPuzzle(); };
@@ -273,7 +278,7 @@ function init(){
   });
   document.getElementById('btnAlbum').onclick  = ()=>{ Sound.tap(); document.getElementById('fileAlbum').click(); };
   document.getElementById('btnCamera').onclick = ()=>{ Sound.tap(); document.getElementById('fileCamera').click(); };
-  document.getElementById('btnSample').onclick = ()=>{ Sound.tap(); show('samples'); };
+  document.getElementById('btnSample').onclick = ()=>{ Sound.tap(); renderSamples(); show('samples'); };  // 開くたびに現在の言語で描き直す
   document.getElementById('fileAlbum').addEventListener('change', e=> pickFile(e.target));
   document.getElementById('fileCamera').addEventListener('change', e=> pickFile(e.target));
 

@@ -76,12 +76,18 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .src-loading{ min-height:1.5em; color:#666; font-size:.85em; margin-top:8px; }
 
 /* ========== サンプル（名画）グリッド ========== */
-.sample-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;
+#samples{ justify-content:flex-start; padding-top:28px; }   /* 12点＋題名で縦に長い＝上から並べてスクロール */
+.sample-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
   width:100%; max-width:560px; }
-.sample-btn{ border:4px solid var(--line); border-radius:18px; padding:0; overflow:hidden;
-  background:var(--surface); cursor:pointer; aspect-ratio:1; }
+.sample-btn{ display:flex; flex-direction:column; align-items:center; gap:2px;
+  border:4px solid var(--line); border-radius:18px; padding:0 0 8px; overflow:hidden;
+  background:var(--surface); cursor:pointer; min-width:0; }
 .sample-btn:active{ border-color:var(--brand); transform:scale(.97); }
-.sample-btn img{ width:100%; height:100%; object-fit:cover; display:block; }
+.sample-btn img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; margin-bottom:4px; }
+.sample-t{ font-size:.62em; font-weight:800; line-height:1.25; color:var(--text);
+  padding:0 8px; max-width:100%; overflow-wrap:break-word; }
+.sample-a{ font-size:.52em; font-weight:700; color:#777;
+  padding:0 8px; max-width:100%; overflow-wrap:break-word; }
 
 /* ========== パズル ========== */
 #game{ justify-content:flex-start; padding-top:20px; }

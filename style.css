@@ -1,0 +1,233 @@
+/* =========================================================
+   脳活ジグソーパズル ― シニア向けデザイン
+   方針: 特大文字 / 高コントラスト / 巨大タップ領域 / 迷わせない
+   ========================================================= */
+:root{
+  --bg:#F4F1E8;         /* 目にやさしいクリーム背景 */
+  --surface:#FFFFFF;
+  --text:#1A1A1A;       /* 高コントラストの濃い文字 */
+  --brand:#2E7D32;      /* 落ち着いた緑（そよぎ） */
+  --brand-dark:#1B5E20;
+  --accent:#EF6C00;     /* 目立つオレンジ */
+  --accent-dark:#B45309;
+  --mid:#1E88E5;        /* 中級＝青 */
+  --mid-dark:#1565C0;
+  --correct:#2E7D32;
+  --wrong:#C62828;
+  --tap:#E8F5E9;
+  --line:#CFC9B8;
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ margin:0; height:100%; }
+body{
+  font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,
+              "Noto Sans","Segoe UI",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.4; user-select:none;
+}
+/* 文字サイズ（設定で切替） */
+body.scale-M { font-size:clamp(20px,5.2vw,30px); }
+body.scale-L { font-size:clamp(23px,6.0vw,34px); }
+body.scale-XL{ font-size:clamp(26px,6.8vw,40px); }
+
+/* ---- 画面 ---- */
+.screen{ display:none; min-height:100dvh; padding:24px 20px;
+  flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.screen.active{ display:flex; }
+
+/* ---- 共通の巨大ボタン ---- */
+.big-btn{
+  width:100%; max-width:520px; min-height:112px;
+  font-size:1.4em; font-weight:800; color:#fff; background:var(--brand);
+  border:none; border-radius:24px; padding:18px; margin:10px 0;
+  box-shadow:0 6px 0 var(--brand-dark); cursor:pointer;
+}
+.big-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--brand-dark); }
+.link-back{ margin-top:28px; background:none; border:none; color:#666;
+  font-size:.9em; text-decoration:underline; cursor:pointer; }
+h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; }
+
+/* ========== ホーム ========== */
+.gear{ position:fixed; top:12px; right:14px; font-size:1.7em; color:#9a9a9a;
+  background:none; border:none; cursor:pointer; z-index:5; }
+.logo{ font-size:2.1em; font-weight:900; color:var(--brand-dark); margin-bottom:6px; }
+.tagline{ font-size:.9em; color:#555; margin-bottom:44px; }
+.start{ min-height:170px; font-size:1.6em; background:var(--accent);
+  box-shadow:0 8px 0 var(--accent-dark); }
+.start:active{ box-shadow:0 2px 0 var(--accent-dark); }
+.home-info{ margin-top:26px; color:#666; }
+.home-date{ font-size:1.3em; font-weight:800; color:var(--brand-dark); line-height:1.35; }
+
+/* ========== 難易度選択 ========== */
+.lv-btn{ display:flex; align-items:center; justify-content:space-between; padding:18px 30px; }
+.lv-name{ font-size:1.15em; }
+.lv-sub{ font-size:.72em; font-weight:800; opacity:.95; display:flex; align-items:center; gap:8px; }
+.lv-grid{ font-size:1.5em; line-height:1; }
+.lv-easy{ background:var(--accent); box-shadow:0 6px 0 var(--accent-dark); }  /* 初級＝オレンジ（そよぎの「いつもの」と同じ） */
+.lv-easy:active{ box-shadow:0 2px 0 var(--accent-dark); }
+.lv-mid{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); }
+.lv-mid:active{ box-shadow:0 2px 0 var(--mid-dark); }
+.lv-hard{ background:var(--brand); box-shadow:0 6px 0 var(--brand-dark); }    /* 上級＝緑（そよぎの「むずかしい」と同じ） */
+.lv-hard:active{ box-shadow:0 2px 0 var(--brand-dark); }
+
+/* ========== 写真の入手先 ========== */
+.src-btn{ display:flex; align-items:center; gap:14px; justify-content:center; }
+.src-sample{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); }
+.src-sample:active{ box-shadow:0 2px 0 var(--mid-dark); }
+.src-loading{ min-height:1.5em; color:#666; font-size:.85em; margin-top:8px; }
+
+/* ========== サンプル（名画）グリッド ========== */
+.sample-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;
+  width:100%; max-width:560px; }
+.sample-btn{ border:4px solid var(--line); border-radius:18px; padding:0; overflow:hidden;
+  background:var(--surface); cursor:pointer; aspect-ratio:1; }
+.sample-btn:active{ border-color:var(--brand); transform:scale(.97); }
+.sample-btn img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ========== パズル ========== */
+#game{ justify-content:flex-start; padding-top:20px; }
+.g-instruct{ font-size:.9em; font-weight:700; color:#444; margin-bottom:12px; }
+.g-body{ width:100%; display:flex; flex-direction:column; align-items:center; }
+
+.pz-top{ display:flex; align-items:center; justify-content:center; gap:22px; margin-bottom:14px; }
+.pz-ref{ width:clamp(84px,22vw,130px); height:clamp(84px,22vw,130px); object-fit:cover;
+  border-radius:12px; border:3px solid var(--line); }
+.pz-stats{ display:flex; flex-direction:column; gap:8px; text-align:left; }
+.pz-stat{ display:flex; align-items:baseline; gap:10px; }
+.pz-cap{ font-size:.68em; color:#666; font-weight:700; }
+.pz-stat b{ font-size:1.25em; font-weight:900; color:var(--brand-dark); min-width:2.4em; }
+
+.pz-board{ display:grid; gap:6px; width:min(94vw,560px); aspect-ratio:1;
+  touch-action:none; transition:gap .5s; }
+.pcell{ background-repeat:no-repeat; border-radius:10px; cursor:grab;
+  box-shadow:0 2px 5px rgba(0,0,0,.25); position:relative; transition:border-radius .5s; }
+.pcell.lifting{ opacity:.35; }
+.pcell.drop-target{ outline:5px solid var(--accent); outline-offset:-2px; z-index:2; }
+/* 正しい位置のピースに小さな✓（手がかり） */
+.pcell.placed::after{ content:'✓'; position:absolute; right:5px; bottom:3px;
+  font-size:15px; font-weight:900; color:#fff; background:var(--correct);
+  width:21px; height:21px; line-height:21px; border-radius:50%; text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.35); }
+/* 完成：隙間・角丸・✓を消して1枚の絵に */
+.pz-board.done{ gap:0; animation:doneGlow 1.2s ease; }
+.pz-board.done .pcell{ border-radius:0; box-shadow:none; cursor:default; }
+.pz-board.done .pcell.placed::after{ display:none; }
+@keyframes doneGlow{ 0%{ filter:brightness(1);} 30%{ filter:brightness(1.25);} 100%{ filter:brightness(1);} }
+
+/* 指に追従する分身ピース */
+.pghost{ position:fixed; z-index:60; pointer-events:none; border-radius:10px;
+  box-shadow:0 10px 24px rgba(0,0,0,.45); transform:scale(1.08); opacity:.95;
+  background-repeat:no-repeat; }
+
+/* ========== 結果 ========== */
+.result-title{ font-size:1.8em; font-weight:900; color:var(--brand-dark); margin-bottom:10px; }
+.stars{ font-size:2.6em; margin:6px 0; }
+.result-photo{ width:clamp(140px,40vw,220px); height:clamp(140px,40vw,220px); object-fit:cover;
+  border-radius:16px; border:4px solid var(--line); margin:8px 0; }
+.result-nums{ display:flex; gap:34px; justify-content:center; margin:10px 0 16px; }
+.rn{ display:flex; flex-direction:column; gap:2px; }
+.rn-cap{ font-size:.72em; color:#666; font-weight:700; }
+.rn b{ font-size:1.6em; font-weight:900; color:var(--brand-dark); }
+.streak{ font-size:1.1em; margin-bottom:14px; }
+.other-btn{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); min-height:88px; font-size:1.1em; }
+.other-btn:active{ box-shadow:0 2px 0 var(--mid-dark); }
+
+/* ========== 設定 ========== */
+.settings{ justify-content:flex-start; padding-top:40px; }
+.settings h2{ font-size:1.5em; margin:0 0 18px; color:var(--text); }
+.set-label{ font-size:.85em; font-weight:800; color:#555; align-self:center;
+  margin:18px 0 8px; }
+.lang-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  width:100%; max-width:540px; }
+.lang-btn{ min-height:64px; border:3px solid var(--line); border-radius:14px;
+  background:var(--surface); color:var(--text); font-size:.72em; font-weight:700; cursor:pointer; }
+.lang-btn.sel{ border-color:var(--brand); background:var(--tap); }
+.size-row{ display:flex; gap:12px; align-items:flex-end; }
+.size-btn{ background:var(--surface); border:3px solid var(--line); border-radius:14px;
+  width:72px; min-height:72px; font-weight:800; cursor:pointer; color:var(--text); }
+.size-btn:nth-child(1){ font-size:1.1em; } .size-btn:nth-child(2){ font-size:1.5em; }
+.size-btn:nth-child(3){ font-size:1.9em; }
+.size-btn.sel{ border-color:var(--brand); background:var(--tap); }
+.sound-btn{ font-size:2em; width:96px; min-height:76px; border:3px solid var(--line);
+  border-radius:16px; background:var(--surface); cursor:pointer; }
+
+/* ===================== 演出（アニメーション） ===================== */
+.screen.active{ animation:screenIn .35s ease both; }
+@keyframes screenIn{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none;} }
+
+/* ロゴが風にそよぐ（そよぎ） */
+.logo{ animation:sway 4s ease-in-out infinite; transform-origin:50% 90%; }
+@keyframes sway{ 0%,100%{ transform:rotate(-1.2deg);} 50%{ transform:rotate(1.2deg);} }
+
+/* 結果：星が順にポップ */
+.stars span{ display:inline-block; animation:starPop .5s cubic-bezier(.2,1.6,.4,1) backwards; }
+@keyframes starPop{ 0%{ transform:scale(0) rotate(-40deg); opacity:0;} 100%{ transform:none; opacity:1;} }
+
+/* 紙吹雪 */
+.confetti{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:40; }
+.confetti i{ position:absolute; top:-24px; width:12px; height:16px; border-radius:2px;
+  animation:fall 2.6s linear forwards; }
+@keyframes fall{ 0%{ transform:translateY(-12vh) rotate(0);} 100%{ transform:translateY(112vh) rotate(560deg);} }
+
+/* クレジット（HPリンク・タイトル画面） */
+.credit{ display:inline-block; margin-top:22px; max-width:92%; font-size:.62em; line-height:1.5;
+  color:var(--brand-dark); text-decoration:underline; text-align:center; }
+.credit:active{ opacity:.6; }
+
+/* 「動きを減らす」設定を尊重（強い動きを止める） */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001s!important; animation-iteration-count:1!important;
+    transition-duration:.001s!important; }
+}
+
+/* ===================== ホーム：プレイ日数・記録ボタン ===================== */
+.home-stats{ margin-top:14px; display:flex; gap:30px; justify-content:center; }
+.stat{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+.st-cap{ font-size:.72em; color:#666; }
+.st-val{ display:flex; align-items:baseline; }
+.st-val b{ font-size:1.9em; font-weight:900; color:var(--brand-dark); line-height:1; }
+.st-val i{ font-style:normal; font-size:.85em; font-weight:800; color:var(--brand-dark); margin-left:3px; }
+.records-btn{ margin-top:22px; min-height:64px; padding:12px 30px; font-size:1.05em; font-weight:800;
+  color:#fff; background:var(--brand); border:none; border-radius:18px;
+  box-shadow:0 5px 0 var(--brand-dark); cursor:pointer; }
+.records-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--brand-dark); }
+
+/* ===================== 記録（カレンダー） ===================== */
+.records{ justify-content:flex-start; padding:16px 8px 24px; }
+.cal-head{ display:flex; align-items:center; justify-content:space-between;
+  width:100%; max-width:640px; margin:0 auto 12px; }
+.cal-nav{ font-size:1.5em; width:64px; min-height:64px; border:none; color:var(--brand-dark);
+  background:var(--surface); border-radius:16px; box-shadow:0 3px 0 var(--line); cursor:pointer; }
+.cal-nav:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
+.cal-month{ font-size:1.5em; font-weight:900; color:var(--brand-dark); }
+.cal-week{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); width:100%; max-width:640px; margin:0 auto; }
+.cal-wd{ text-align:center; font-size:.8em; color:#8a8a8a; padding:5px 0; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; width:100%; max-width:640px; margin:0 auto; }
+.cal-cell{ min-height:92px; border-radius:12px; background:var(--surface); border:2px solid transparent;
+  display:flex; flex-direction:column; align-items:center; padding-top:6px; gap:2px; }
+.cal-cell.empty{ background:transparent; }
+.cal-cell.has{ cursor:pointer; border-color:var(--line); }
+.cal-cell.has:active{ background:var(--tap); }
+.cal-cell.today{ border-color:var(--accent); border-width:3px; }
+.cal-num{ font-size:1.05em; font-weight:800; color:#444; line-height:1; }
+.cal-stars{ font-size:.66em; color:#F5B301; line-height:1; letter-spacing:-1px; min-height:.72em; }
+.cal-badges{ display:flex; gap:4px; margin-top:auto; margin-bottom:7px; flex-wrap:wrap; justify-content:center; }
+.badge{ font-size:.68em; font-weight:800; color:#fff; min-width:21px; height:21px; line-height:21px;
+  border-radius:11px; padding:0 5px; text-align:center; }
+.badge.e{ background:var(--accent); }   /* 初級＝オレンジ */
+.badge.m{ background:var(--mid); }      /* 中級＝青 */
+.badge.h{ background:var(--brand); }    /* 上級＝緑 */
+
+.cal-legend{ display:flex; align-items:center; justify-content:center; gap:6px; margin:14px auto 4px; font-size:.78em; color:#555; }
+.lg{ width:15px; height:15px; border-radius:8px; display:inline-block; }
+.lg.e{ background:var(--accent); } .lg.m{ background:var(--mid); } .lg.h{ background:var(--brand); }
+.lg-t{ margin-right:12px; }
+
+.day-detail{ width:100%; max-width:520px; margin:4px auto 0; }
+.dd-title{ font-size:1.1em; font-weight:800; color:var(--brand-dark); margin:10px 0 8px; text-align:center; }
+.dd-none{ text-align:center; color:#8a8a8a; padding:14px; }
+.dd-row{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+.dd-head{ display:flex; align-items:center; gap:10px; }
+.dd-mode{ font-size:.72em; font-weight:800; color:#fff; padding:3px 12px; border-radius:12px; }
+.dd-mode.e{ background:var(--accent); } .dd-mode.m{ background:var(--mid); } .dd-mode.h{ background:var(--brand); }
+.dd-score{ font-size:1.05em; font-weight:900; color:var(--text); }
+.dd-stars{ margin-left:auto; font-size:1em; }

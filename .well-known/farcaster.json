@@ -1,0 +1,21 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "脳活ジグソーパズル",
+    "iconUrl": "https://nou-jigsaw-web.vercel.app/icons/icon-512.png",
+    "homeUrl": "https://nou-jigsaw-web.vercel.app/",
+    "imageUrl": "https://nou-jigsaw-web.vercel.app/icons/farcaster-embed.png",
+    "buttonTitle": "🧩 あそぶ / Play",
+    "splashImageUrl": "https://nou-jigsaw-web.vercel.app/icons/icon-512.png",
+    "splashBackgroundColor": "#2E7D32",
+    "subtitle": "じぶんの写真が、パズルになる",
+    "description": "高齢者向けの、オフラインで動く無料・広告なしのジグソーパズル。自分の写真・カメラ・名画12点から選んで、4/9/16ピースの3段階。15言語対応。",
+    "primaryCategory": "games",
+    "tags": ["puzzle", "jigsaw", "seniors", "offline", "soyogi"]
+  }
+}

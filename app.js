@@ -297,8 +297,9 @@ function init(){
 }
 document.addEventListener('DOMContentLoaded', init);
 // 保険：Webの自動再生制限で保留中なら、最初の操作でAudioContextを解禁→onstatechangeで自動発火
-document.addEventListener('pointerdown', ()=>{ Sound.unlock(); Bgm.start(); }, { once:true });
-document.addEventListener('keydown',     ()=>{ Sound.unlock(); Bgm.start(); }, { once:true });
+// （ブラウザにより「操作」と認める入力が違うため click / touchend も張る）
+['pointerdown','keydown','click','touchend'].forEach(ev=>
+  document.addEventListener(ev, ()=>{ Sound.unlock(); Bgm.start(); }, { once:true }));
 // タブを離れている間はBGMを止め、戻ったら再開（電池・マナー配慮）
 document.addEventListener('visibilitychange', ()=>{ document.hidden ? Bgm.stop() : Bgm.start(); });
 

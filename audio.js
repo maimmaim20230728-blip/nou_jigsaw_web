@@ -181,6 +181,7 @@ const Bgm = (() => {
 
   return {
     get enabled(){ return enabled; },
+    get playing(){ return playing; },   // 動作確認・デバッグ用
     start, stop, setMood,
     toggle(){
       enabled = !enabled;

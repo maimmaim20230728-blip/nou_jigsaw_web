@@ -37,28 +37,45 @@ let curLevel = null;      // LEVELS の要素
 let curImg   = null;      // 正方形化済みの dataURL / サンプルURL
 
 /* ===== 写真の取込（正方形に切り抜いて dataURL 化） =====
-   ・EXIFの向きはブラウザが自動適用（image-orientation:from-image が既定）
-   ・大きすぎる写真は1024pxに縮小＝メモリと描画の負荷を抑える            */
-function fileToSquare(file){
+   ・EXIFの向きは createImageBitmap({imageOrientation:'from-image'}) で明示適用。
+     非対応/失敗の端末では従来の Image 方式にフォールバック（既定でも向きは自動適用）
+   ・正方形中央切り抜き・大きすぎる写真は1024pxに縮小＝メモリと描画の負荷を抑える  */
+function drawSquare(source, w, h){
+  const side = Math.min(w, h);
+  const sx = (w - side) / 2;
+  const sy = (h - side) / 2;
+  const out = Math.min(side, 1024);
+  const cv = document.createElement('canvas');
+  cv.width = out; cv.height = out;
+  cv.getContext('2d').drawImage(source, sx, sy, side, side, 0, 0, out, out);
+  return cv.toDataURL('image/jpeg', 0.85);
+}
+/* 従来の Image 方式（createImageBitmap 非対応/失敗時のフォールバック） */
+function fileToSquareImg(file){
   return new Promise((resolve, reject)=>{
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = ()=>{
       try{
-        const side = Math.min(img.naturalWidth, img.naturalHeight);
-        const sx = (img.naturalWidth  - side) / 2;
-        const sy = (img.naturalHeight - side) / 2;
-        const out = Math.min(side, 1024);
-        const cv = document.createElement('canvas');
-        cv.width = out; cv.height = out;
-        cv.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, out, out);
+        const dataUrl = drawSquare(img, img.naturalWidth, img.naturalHeight);
         URL.revokeObjectURL(url);
-        resolve(cv.toDataURL('image/jpeg', 0.85));
+        resolve(dataUrl);
       }catch(e){ URL.revokeObjectURL(url); reject(e); }
     };
     img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('load error')); };
     img.src = url;
   });
+}
+function fileToSquare(file){
+  if(window.createImageBitmap){
+    return createImageBitmap(file, { imageOrientation:'from-image' })
+      .then(bmp=>{
+        try{ return drawSquare(bmp, bmp.width, bmp.height); }
+        finally{ if(bmp.close) bmp.close(); }
+      })
+      .catch(()=> fileToSquareImg(file));   // オプション非対応や復号失敗は従来方式へ
+  }
+  return fileToSquareImg(file);
 }
 
 async function pickFile(input){
@@ -72,7 +89,7 @@ async function pickFile(input){
     loading.textContent = '';
     startPuzzle();
   }catch(e){
-    loading.textContent = '';
+    loading.textContent = t('photoError');   // 次のファイル選択開始時に上書きされる
     Sound.ng();
   }
 }
@@ -83,6 +100,7 @@ function renderSamples(){
   const art = I18N.art || LANG.en.art;
   grid.innerHTML = SAMPLES.map(s=>
     '<button class="sample-btn" data-src="'+s.src+'">'+
+      (Store.isDone(s.id) ? '<span class="sample-done" aria-hidden="true">✓</span>' : '') +
       '<img src="'+s.src+'" alt="'+(art[s.id]||'')+'">'+
       '<span class="sample-t">'+(art[s.id]||'')+'</span>'+
       '<span class="sample-a">'+(art[s.artist]||'')+'</span>'+
@@ -105,8 +123,21 @@ function startPuzzle(){
 
 function finishPuzzle(stats){
   Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves });
+  const sample = SAMPLES.find(s=> s.src === curImg);   // サンプル（名画）を完成したら図鑑に登録
+  if(sample) Store.markDone(sample.id);
   renderResult(stats);
   show('result');
+}
+
+/* ===== 見本の拡大表示（パズル中に見本をタップ→画面いっぱいに） ===== */
+function openRefZoom(src){
+  document.getElementById('refZoomImg').src = src;
+  document.getElementById('refZoom').hidden = false;
+  Sound.tap();
+}
+function closeRefZoom(){
+  document.getElementById('refZoom').hidden = true;
+  document.getElementById('refZoomImg').src = '';
 }
 
 /* ===== 結果画面 ===== */
@@ -281,6 +312,14 @@ function init(){
   document.getElementById('btnSample').onclick = ()=>{ Sound.tap(); renderSamples(); show('samples'); };  // 開くたびに現在の言語で描き直す
   document.getElementById('fileAlbum').addEventListener('change', e=> pickFile(e.target));
   document.getElementById('fileCamera').addEventListener('change', e=> pickFile(e.target));
+
+  document.getElementById('btnHint').onclick = ()=>{ PuzzleGame.hint(); };   // hint()内でSound.swap()を鳴らす
+  // 見本タップで拡大（.pz-refは毎回作り直されるので g-body に委譲）／オーバーレイはどこを押しても閉じる
+  document.querySelector('#game .g-body').addEventListener('click', e=>{
+    const ref = e.target.closest && e.target.closest('.pz-ref');
+    if(ref) openRefZoom(ref.src);
+  });
+  document.getElementById('refZoom').onclick = ()=>{ Sound.tap(); closeRefZoom(); };
 
   document.getElementById('btnQuit').onclick = ()=>{ Sound.tap(); PuzzleGame.stop(); renderHome(); show('home'); };
   document.getElementById('btnAgain').onclick = ()=>{ Sound.tap(); startPuzzle(); };

@@ -30,7 +30,7 @@ const LEVELS = [
   { id:'hard', n:4, pieces:16, starSec:[120,240] },
 ];
 
-/* ---- サンプル画像（パブリックドメインの名画12点・Wikimedia Commonsの忠実複製より） ----
+/* ---- サンプル画像（パブリックドメインの名画36点・Wikimedia Commonsの忠実複製より） ----
    すべて作者没後70年超のPD。平面美術の忠実複製写真に新たな著作権は発生しない(PD-Art)
    タイトル・作者名の15言語訳は data/lang.js の ART（LANG[code].art）にある      */
 const SAMPLES = [
@@ -59,4 +59,17 @@ const SAMPLES = [
   { id:'fujin_raijin',       artist:'sotatsu',   src:'assets/samples/fujin_raijin.jpg' },        // 俵屋宗達「風神雷神図屏風」
   { id:'night_watch',        artist:'rembrandt', src:'assets/samples/night_watch.jpg' },         // レンブラント「夜警」
   { id:'las_meninas',        artist:'velazquez', src:'assets/samples/las_meninas.jpg' },         // ベラスケス「ラス・メニーナス」
+  // ---- 追加12点（2026-07-11・計36点）----
+  { id:'almond_blossom',     artist:'vangogh',   src:'assets/samples/almond_blossom.jpg' },      // ゴッホ「アーモンドの花」
+  { id:'ohashi_rain',        artist:'hiroshige', src:'assets/samples/ohashi_rain.jpg' },         // 広重「名所江戸百景 大はしあたけの夕立」
+  { id:'angelus',            artist:'millet',    src:'assets/samples/angelus.jpg' },             // ミレー「晩鐘」
+  { id:'grande_jatte',       artist:'seurat',    src:'assets/samples/grande_jatte.jpg' },        // スーラ「グランド・ジャット島の日曜日の午後」
+  { id:'etoile',             artist:'degas',     src:'assets/samples/etoile.jpg' },              // ドガ「エトワール」
+  { id:'apples_oranges',     artist:'cezanne',   src:'assets/samples/apples_oranges.jpg' },      // セザンヌ「りんごとオレンジ」
+  { id:'fifer',              artist:'manet',     src:'assets/samples/fifer.jpg' },               // マネ「笛を吹く少年」
+  { id:'babel',              artist:'bruegel',   src:'assets/samples/babel.jpg' },               // ブリューゲル「バベルの塔」
+  { id:'wanderer',           artist:'friedrich', src:'assets/samples/wanderer.jpg' },            // フリードリヒ「雲海の上の旅人」
+  { id:'ajisai_sokei',       artist:'jakuchu',   src:'assets/samples/ajisai_sokei.jpg' },        // 伊藤若冲「紫陽花双鶏図」
+  { id:'kakitsubata',        artist:'korin',     src:'assets/samples/kakitsubata.jpg' },         // 尾形光琳「燕子花図屏風」
+  { id:'edobee',             artist:'sharaku',   src:'assets/samples/edobee.jpg' },              // 写楽「三世大谷鬼次の奴江戸兵衛」
 ];

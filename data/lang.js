@@ -330,7 +330,98 @@ const ART2 = {
     last_supper:'अंतिम भोज', birth_of_venus:'वीनस का जन्म', kiss:'चुंबन', liberty:'स्वतंत्रता जनता का नेतृत्व करती हुई', gleaners:'बालियाँ बीनने वाली स्त्रियाँ', moulin_galette:'मूलां द ला गालेत का नृत्य',
     school_of_athens:'एथेंस का विद्यालय', red_fuji:'लाल फ़ूजी', mikaeri_bijin:'मुड़कर देखती सुंदरी', fujin_raijin:'पवन देव और गर्जन देव', night_watch:'रात का पहरा', las_meninas:'लास मेनिनास' },
 };
-Object.keys(ART).forEach(k=>{ if(LANG[k]) LANG[k].art = Object.assign({}, ART[k], ART2[k]); });
+/* ---- 追加12点（2026-07-11・計36点）のタイトルと新規作者9名 ---- */
+const ART3 = {
+  ja: { seurat:'スーラ', degas:'ドガ', cezanne:'セザンヌ', manet:'マネ', bruegel:'ブリューゲル', friedrich:'フリードリヒ', jakuchu:'伊藤若冲', korin:'尾形光琳', sharaku:'東洲斎写楽',
+    almond_blossom:'アーモンドの花', ohashi_rain:'大はしあたけの夕立', angelus:'晩鐘', grande_jatte:'グランド・ジャット島の日曜日の午後', etoile:'エトワール',
+    apples_oranges:'りんごとオレンジ', fifer:'笛を吹く少年', babel:'バベルの塔', wanderer:'雲海の上の旅人',
+    ajisai_sokei:'紫陽花双鶏図', kakitsubata:'燕子花図屏風', edobee:'三世大谷鬼次の奴江戸兵衛' },
+  en: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Almond Blossom', ohashi_rain:'Sudden Shower over Ōhashi Bridge', angelus:'The Angelus', grande_jatte:'A Sunday on La Grande Jatte', etoile:'The Star',
+    apples_oranges:'Apples and Oranges', fifer:'The Fifer', babel:'The Tower of Babel', wanderer:'Wanderer above the Sea of Fog',
+    ajisai_sokei:'Rooster and Hen with Hydrangeas', kakitsubata:'Irises (Folding Screen)', edobee:'Ōtani Oniji III as Yakko Edobei' },
+  zh: { seurat:'修拉', degas:'德加', cezanne:'塞尚', manet:'马奈', bruegel:'勃鲁盖尔', friedrich:'弗里德里希', jakuchu:'伊藤若冲', korin:'尾形光琳', sharaku:'东洲斋写乐',
+    almond_blossom:'盛开的杏花', ohashi_rain:'大桥安宅骤雨', angelus:'晚钟', grande_jatte:'大碗岛的星期天下午', etoile:'舞台上的舞者',
+    apples_oranges:'苹果和橙子', fifer:'吹笛少年', babel:'巴别塔', wanderer:'雾海上的旅人',
+    ajisai_sokei:'紫阳花双鸡图', kakitsubata:'燕子花图屏风', edobee:'三代目大谷鬼次之奴江户兵卫' },
+  'zh-TW': { seurat:'秀拉', degas:'竇加', cezanne:'塞尚', manet:'馬奈', bruegel:'布勒哲爾', friedrich:'弗里德里希', jakuchu:'伊藤若冲', korin:'尾形光琳', sharaku:'東洲齋寫樂',
+    almond_blossom:'盛開的杏花', ohashi_rain:'大橋安宅驟雨', angelus:'晚禱', grande_jatte:'大傑特島的星期日下午', etoile:'舞台上的舞者',
+    apples_oranges:'蘋果與柳橙', fifer:'吹笛少年', babel:'巴別塔', wanderer:'霧海上的旅人',
+    ajisai_sokei:'紫陽花雙雞圖', kakitsubata:'燕子花圖屏風', edobee:'三代目大谷鬼次之奴江戶兵衛' },
+  ko: { seurat:'쇠라', degas:'드가', cezanne:'세잔', manet:'마네', bruegel:'브뤼헐', friedrich:'프리드리히', jakuchu:'이토 자쿠추', korin:'오가타 고린', sharaku:'도슈사이 샤라쿠',
+    almond_blossom:'꽃 피는 아몬드 나무', ohashi_rain:'오하시 다리의 소나기', angelus:'만종', grande_jatte:'그랑드자트섬의 일요일 오후', etoile:'에투알',
+    apples_oranges:'사과와 오렌지', fifer:'피리 부는 소년', babel:'바벨탑', wanderer:'안개 바다 위의 방랑자',
+    ajisai_sokei:'수국과 두 마리 닭', kakitsubata:'제비붓꽃 병풍', edobee:'얏코 에도베이 역의 오타니 오니지 3세' },
+  es: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Almendro en flor', ohashi_rain:'Aguacero sobre el puente Ōhashi', angelus:'El Ángelus', grande_jatte:'Tarde de domingo en la isla de la Grande Jatte', etoile:'La estrella',
+    apples_oranges:'Manzanas y naranjas', fifer:'El pífano', babel:'La torre de Babel', wanderer:'El caminante sobre el mar de nubes',
+    ajisai_sokei:'Gallo y gallina con hortensias', kakitsubata:'Lirios (biombo)', edobee:'Ōtani Oniji III como Yakko Edobei' },
+  pt: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Amendoeira em flor', ohashi_rain:'Aguaceiro sobre a ponte Ōhashi', angelus:'O Angelus', grande_jatte:'Uma Tarde de Domingo na Ilha de Grande Jatte', etoile:'A Estrela',
+    apples_oranges:'Maçãs e laranjas', fifer:'O tocador de pífaro', babel:'A Torre de Babel', wanderer:'O andarilho sobre o mar de névoa',
+    ajisai_sokei:'Galo e galinha com hortênsias', kakitsubata:'Íris (biombo)', edobee:'Ōtani Oniji III como Yakko Edobei' },
+  fr: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Amandier en fleurs', ohashi_rain:'Averse sur le pont Ōhashi', angelus:"L'Angélus", grande_jatte:"Un dimanche après-midi à l'île de la Grande Jatte", etoile:"L'Étoile",
+    apples_oranges:'Pommes et oranges', fifer:'Le Fifre', babel:'La Tour de Babel', wanderer:'Le Voyageur contemplant une mer de nuages',
+    ajisai_sokei:'Coq et poule aux hortensias', kakitsubata:'Iris (paravent)', edobee:'Ōtani Oniji III en Yakko Edobei' },
+  de: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Mandelblüte', ohashi_rain:'Regenschauer über der Ōhashi-Brücke', angelus:'Das Angelusläuten', grande_jatte:'Ein Sonntagnachmittag auf der Insel La Grande Jatte', etoile:'Der Stern',
+    apples_oranges:'Äpfel und Orangen', fifer:'Der Pfeifer', babel:'Der Turmbau zu Babel', wanderer:'Der Wanderer über dem Nebelmeer',
+    ajisai_sokei:'Hahn und Henne mit Hortensien', kakitsubata:'Schwertlilien (Wandschirm)', edobee:'Ōtani Oniji III. als Yakko Edobei' },
+  it: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Mandorlo in fiore', ohashi_rain:'Acquazzone sul ponte Ōhashi', angelus:"L'Angelus", grande_jatte:'Una domenica pomeriggio alla Grande-Jatte', etoile:"L'étoile",
+    apples_oranges:'Mele e arance', fifer:'Il pifferaio', babel:'La torre di Babele', wanderer:'Viandante sul mare di nebbia',
+    ajisai_sokei:'Gallo e gallina con ortensie', kakitsubata:'Iris (paravento)', edobee:'Ōtani Oniji III nel ruolo di Yakko Edobei' },
+  nl: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Amandelbloesem', ohashi_rain:'Plotselinge regenbui boven de Ōhashi-brug', angelus:'Het angelus', grande_jatte:'Een zondagmiddag op het eiland La Grande Jatte', etoile:'De ster',
+    apples_oranges:'Appels en sinaasappels', fifer:'De fluitspeler', babel:'De toren van Babel', wanderer:'De wandelaar boven de nevelen',
+    ajisai_sokei:"Haan en hen met hortensia's", kakitsubata:'Irissen (kamerscherm)', edobee:'Ōtani Oniji III als Yakko Edobei' },
+  pl: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Kwitnący migdałowiec', ohashi_rain:'Ulewa nad mostem Ōhashi', angelus:'Anioł Pański', grande_jatte:'Niedzielne popołudnie na wyspie Grande Jatte', etoile:'Gwiazda',
+    apples_oranges:'Jabłka i pomarańcze', fifer:'Flecista', babel:'Wieża Babel', wanderer:'Wędrowiec nad morzem mgły',
+    ajisai_sokei:'Kogut i kura wśród hortensji', kakitsubata:'Irysy (parawan)', edobee:'Ōtani Oniji III jako Yakko Edobei' },
+  ru: { seurat:'Сёра', degas:'Дега', cezanne:'Сезанн', manet:'Мане', bruegel:'Брейгель', friedrich:'Фридрих', jakuchu:'Ито Дзякутю', korin:'Огата Корин', sharaku:'Сяраку',
+    almond_blossom:'Цветущие ветки миндаля', ohashi_rain:'Внезапный ливень над мостом Охаси', angelus:'Анжелюс', grande_jatte:'Воскресный день на острове Гранд-Жатт', etoile:'Звезда',
+    apples_oranges:'Яблоки и апельсины', fifer:'Флейтист', babel:'Вавилонская башня', wanderer:'Странник над морем тумана',
+    ajisai_sokei:'Петух и курица с гортензиями', kakitsubata:'Ирисы (ширма)', edobee:'Отани Онидзи III в роли Якко Эдобэя' },
+  tr: { seurat:'Seurat', degas:'Degas', cezanne:'Cézanne', manet:'Manet', bruegel:'Bruegel', friedrich:'Friedrich', jakuchu:'Itō Jakuchū', korin:'Ogata Kōrin', sharaku:'Sharaku',
+    almond_blossom:'Çiçek Açan Badem Ağacı', ohashi_rain:'Ōhashi Köprüsü’nde Sağanak', angelus:'Angelus', grande_jatte:'Grande Jatte Adası’nda Bir Pazar Öğleden Sonrası', etoile:'Yıldız',
+    apples_oranges:'Elmalar ve Portakallar', fifer:'Flüt Çalan Çocuk', babel:'Babil Kulesi', wanderer:'Sis Denizinin Üzerinde Gezgin',
+    ajisai_sokei:'Ortancalı Horoz ve Tavuk', kakitsubata:'Süsenler (paravan)', edobee:'Yakko Edobei rolünde Ōtani Oniji III' },
+  hi: { seurat:'सेरा', degas:'देगा', cezanne:'सेज़ान', manet:'माने', bruegel:'ब्रूगेल', friedrich:'फ्रीडरिख', jakuchu:'इतो जाकुचू', korin:'ओगाता कोरिन', sharaku:'शाराकु',
+    almond_blossom:'बादाम के फूल', ohashi_rain:'ओहाशी पुल पर अचानक वर्षा', angelus:'एंजेलस', grande_jatte:'ग्रांद जात द्वीप पर रविवार की दोपहर', etoile:'द स्टार (बैले नर्तकी)',
+    apples_oranges:'सेब और संतरे', fifer:'बाँसुरी बजाता लड़का', babel:'बाबेल की मीनार', wanderer:'कोहरे के सागर के ऊपर यात्री',
+    ajisai_sokei:'हाइड्रेंजिया के साथ मुर्गा-मुर्गी', kakitsubata:'आइरिस फूल (परदा)', edobee:'याक्को एदोबेई के रूप में ओतानी ओनिजी III' },
+};
+Object.keys(ART).forEach(k=>{ if(LANG[k]) LANG[k].art = Object.assign({}, ART[k], ART2[k], ART3[k]); });
+
+/* ---- ヒントボタン・写真読み込みエラー（2026-07-11ブラッシュアップ・15言語） ---- */
+const HINT = {
+  ja:'ヒント', en:'Hint', zh:'提示', 'zh-TW':'提示', ko:'힌트',
+  es:'Pista', pt:'Dica', fr:'Indice', de:'Tipp', it:'Suggerimento',
+  nl:'Hint', pl:'Podpowiedź', ru:'Подсказка', tr:'İpucu', hi:'संकेत',
+};
+const PHOTOERR = {
+  ja:'しゃしんを ひらけませんでした。べつの しゃしんで ためしてね',
+  en:'Could not open the photo. Please try another one.',
+  zh:'无法打开照片。请试试其他照片。',
+  'zh-TW':'無法開啟照片。請試試其他照片。',
+  ko:'사진을 열 수 없었어요. 다른 사진으로 해 보세요.',
+  es:'No se pudo abrir la foto. Prueba con otra.',
+  pt:'Não foi possível abrir a foto. Tente outra.',
+  fr:"Impossible d'ouvrir la photo. Essayez-en une autre.",
+  de:'Das Foto konnte nicht geöffnet werden. Bitte versuche ein anderes.',
+  it:"Impossibile aprire la foto. Provane un'altra.",
+  nl:'Kon de foto niet openen. Probeer een andere.',
+  pl:'Nie udało się otworzyć zdjęcia. Spróbuj z innym.',
+  ru:'Не удалось открыть фото. Попробуйте другое.',
+  tr:'Fotoğraf açılamadı. Başka bir fotoğraf deneyin.',
+  hi:'फ़ोटो नहीं खुल सकी। कृपया दूसरी फ़ोटो आज़माएँ।',
+};
+Object.keys(LANG).forEach(k=>{
+  LANG[k].ui.hint = HINT[k] || HINT.en;
+  LANG[k].ui.photoError = PHOTOERR[k] || PHOTOERR.en;
+});
 
 /* ---- プレイ回数ラベルと単位（日／回）。単位はCJK/韓のみ表示、他は空（見出しで足りる） ---- */
 const PLAYCOUNT = {

@@ -1,5 +1,5 @@
 /* Service Worker ― 完全オフライン動作（全ファイルを端末にキャッシュ） */
-const CACHE = 'soyogi-jigsaw-v6';
+const CACHE = 'soyogi-jigsaw-v7';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'puzzle.js',
   'data/config.js', 'data/lang.js',
@@ -13,6 +13,10 @@ const ASSETS = [
   'assets/samples/liberty.jpg', 'assets/samples/gleaners.jpg', 'assets/samples/moulin_galette.jpg',
   'assets/samples/school_of_athens.jpg', 'assets/samples/red_fuji.jpg', 'assets/samples/mikaeri_bijin.jpg',
   'assets/samples/fujin_raijin.jpg', 'assets/samples/night_watch.jpg', 'assets/samples/las_meninas.jpg',
+  'assets/samples/almond_blossom.jpg', 'assets/samples/ohashi_rain.jpg', 'assets/samples/angelus.jpg',
+  'assets/samples/grande_jatte.jpg', 'assets/samples/etoile.jpg', 'assets/samples/apples_oranges.jpg',
+  'assets/samples/fifer.jpg', 'assets/samples/babel.jpg', 'assets/samples/wanderer.jpg',
+  'assets/samples/ajisai_sokei.jpg', 'assets/samples/kakitsubata.jpg', 'assets/samples/edobee.jpg',
 ];
 
 self.addEventListener('install', e=>{

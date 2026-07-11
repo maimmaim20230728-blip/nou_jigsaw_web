@@ -144,6 +144,25 @@ const PuzzleGame = (() => {
       timerId = setInterval(tick, 1000);
     },
 
+    /* ヒント（上級16ピースの救済）：間違った位置のセルを1つ選び、
+       そこへ入るべきピースと入れ替えて必ず1枚を正位置にする。
+       入れ替え式なので他が崩れることはなく、直したセルを一瞬光らせて伝える */
+    hint(){
+      if(finished) return;
+      const wrong = [];
+      for(let i=0;i<perm.length;i++){ if(perm[i] !== i) wrong.push(i); }
+      if(!wrong.length) return;
+      const target = wrong[Math.floor(Math.random()*wrong.length)];  // 正解にするセル
+      const loc = perm.indexOf(target);                              // ピースtargetが今いるセル
+      [perm[target], perm[loc]] = [perm[loc], perm[target]];
+      moves++; statMoves.textContent = moves;
+      Sound.swap();
+      render();
+      const fixed = boardEl.querySelector('.pcell[data-i="'+target+'"]');
+      if(fixed){ fixed.classList.add('hint-fixed'); setTimeout(()=>fixed.classList.remove('hint-fixed'), 1000); }
+      checkDone();
+    },
+
     /* 途中でやめた時の後片付け（記録しない） */
     stop(){
       finished = true;

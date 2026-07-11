@@ -10,7 +10,8 @@
    ・キー名はアプリ版に依存しない固定値。コード内でこの記録を消去する処理は持たない。
    ・破損時も既存を極力守るため、読み書きは try/catch で保護。            */
 const Store = (() => {
-  const KEY = 'soyogi.jigsaw.records';
+  const KEY  = 'soyogi.jigsaw.records';
+  const DONE = 'soyogi.jigsaw.doneSamples';   // 完成したサンプル（名画）idの配列
 
   function load(){
     try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }
@@ -18,6 +19,13 @@ const Store = (() => {
   }
   function save(obj){
     try{ localStorage.setItem(KEY, JSON.stringify(obj)); }catch(e){ /* 保存失敗時も既存は保持 */ }
+  }
+  function loadDone(){
+    try{ const a = JSON.parse(localStorage.getItem(DONE)); return Array.isArray(a) ? a : []; }
+    catch(e){ return []; }
+  }
+  function saveDone(arr){
+    try{ localStorage.setItem(DONE, JSON.stringify(arr)); }catch(e){ /* 保存失敗時も既存は保持 */ }
   }
   function keyOf(d){
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -82,6 +90,14 @@ const Store = (() => {
       }
       return n;
     },
+
+    /* --- 完成コレクション（サンプルの名画を完成させると図鑑に記録） --- */
+    markDone(id){
+      const arr = loadDone();
+      if(arr.indexOf(id) === -1){ arr.push(id); saveDone(arr); }
+      return arr;
+    },
+    isDone(id){ return loadDone().indexOf(id) !== -1; },
 
     /* --- 設定 --- */
     getLang(){ return localStorage.getItem('soyogi.jigsaw.lang') || ''; },

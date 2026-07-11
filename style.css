@@ -81,10 +81,16 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   width:100%; max-width:560px; }
 .sample-btn{ display:flex; flex-direction:column; align-items:center; gap:2px;
   font:inherit;   /* buttonはフォントを継承しない＝文字サイズ設定(M/L/XL)を題名にも効かせる */
+  position:relative;   /* 完成済みバッジ(.sample-done)の基準 */
   border:4px solid var(--line); border-radius:18px; padding:0 0 8px; overflow:hidden;
   background:var(--surface); cursor:pointer; min-width:0; }
 .sample-btn:active{ border-color:var(--brand); transform:scale(.97); }
 .sample-btn img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; margin-bottom:4px; }
+/* 完成済みサンプルのバッジ（緑丸に白✓・絵の邪魔をしない小ささ） */
+.sample-done{ position:absolute; top:6px; right:6px; z-index:2;
+  width:30px; height:30px; line-height:30px; text-align:center;
+  font-size:17px; font-weight:900; color:#fff; background:var(--correct);
+  border:2px solid #fff; border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,.35); }
 .sample-t{ font-size:.62em; font-weight:800; line-height:1.25; color:var(--text);
   padding:0 8px; max-width:100%; overflow-wrap:break-word; }
 .sample-a{ font-size:.52em; font-weight:700; color:#777;
@@ -97,7 +103,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 
 .pz-top{ display:flex; align-items:center; justify-content:center; gap:22px; margin-bottom:14px; }
 .pz-ref{ width:clamp(84px,22vw,130px); height:clamp(84px,22vw,130px); object-fit:cover;
-  border-radius:12px; border:3px solid var(--line); }
+  border-radius:12px; border:3px solid var(--line); cursor:pointer; }
 .pz-stats{ display:flex; flex-direction:column; gap:8px; text-align:left; }
 .pz-stat{ display:flex; align-items:baseline; gap:10px; }
 .pz-cap{ font-size:.68em; color:#666; font-weight:700; }
@@ -124,6 +130,30 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .pghost{ position:fixed; z-index:60; pointer-events:none; border-radius:10px;
   box-shadow:0 10px 24px rgba(0,0,0,.45); transform:scale(1.08); opacity:.95;
   background-repeat:no-repeat; }
+
+/* ヒントボタン（上級の救済・押しやすい大きさ） */
+.hint-btn{ margin-top:18px; min-height:66px; padding:12px 40px;
+  font-size:1.05em; font-weight:800; color:#fff; background:var(--accent);
+  border:none; border-radius:20px; box-shadow:0 5px 0 var(--accent-dark); cursor:pointer; }
+.hint-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--accent-dark); }
+/* ヒントで直したピースを一瞬光らせる（「ここが直った」を伝える） */
+.pcell.hint-fixed{ animation:hintPop 1s ease; z-index:3; }
+@keyframes hintPop{
+  0%  { outline:6px solid var(--accent); outline-offset:-3px; filter:brightness(1.4); }
+  70% { outline:6px solid var(--accent); outline-offset:-3px; filter:brightness(1.15); }
+  100%{ outline:6px solid transparent;   outline-offset:-3px; filter:brightness(1); }
+}
+
+/* ========== 見本の拡大表示 ========== */
+.ref-zoom{ position:fixed; inset:0; z-index:80; padding:24px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.82); }
+.ref-zoom[hidden]{ display:none; }   /* display:flex がUAのhiddenを上書きするので明示 */
+.ref-zoom-img{ max-width:94vw; max-height:82vh; width:auto; height:auto;
+  border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.6); }
+.ref-zoom-close{ position:fixed; top:16px; right:18px; width:64px; height:64px;
+  font-size:2em; font-weight:900; line-height:1; color:#fff;
+  background:rgba(0,0,0,.5); border:3px solid #fff; border-radius:50%;
+  cursor:pointer; z-index:81; }
 
 /* ========== 結果 ========== */
 .result-title{ font-size:1.8em; font-weight:900; color:var(--brand-dark); margin-bottom:10px; }

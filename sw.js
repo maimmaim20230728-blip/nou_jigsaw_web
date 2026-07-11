@@ -1,7 +1,7 @@
 /* Service Worker ― 完全オフライン動作（全ファイルを端末にキャッシュ） */
-const CACHE = 'soyogi-jigsaw-v7';
+const CACHE = 'soyogi-jigsaw-v8';
 const ASSETS = [
-  './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'puzzle.js',
+  './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'tap.js', 'puzzle.js',
   'data/config.js', 'data/lang.js',
   'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',

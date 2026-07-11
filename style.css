@@ -22,7 +22,8 @@ html,body{ margin:0; height:100%; }
 body{
   font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,
               "Noto Sans","Segoe UI",sans-serif;
-  background:var(--bg); color:var(--text); line-height:1.4; user-select:none;
+  background:var(--bg); color:var(--text); line-height:1.4;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
 }
 /* 文字サイズ（設定で切替） */
 body.scale-M { font-size:clamp(20px,5.2vw,30px); }
@@ -41,7 +42,7 @@ body.scale-XL{ font-size:clamp(26px,6.8vw,40px); }
   border:none; border-radius:24px; padding:18px; margin:10px 0;
   box-shadow:0 6px 0 var(--brand-dark); cursor:pointer;
 }
-.big-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--brand-dark); }
+.big-btn:active, .big-btn.pressing{ transform:translateY(4px); box-shadow:0 2px 0 var(--brand-dark); }
 .link-back{ margin-top:28px; background:none; border:none; color:#666;
   font-size:.9em; text-decoration:underline; cursor:pointer; }
 h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; }
@@ -53,7 +54,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .tagline{ font-size:.9em; color:#555; margin-bottom:44px; }
 .start{ min-height:170px; font-size:1.6em; background:var(--accent);
   box-shadow:0 8px 0 var(--accent-dark); }
-.start:active{ box-shadow:0 2px 0 var(--accent-dark); }
+.start:active, .start.pressing{ box-shadow:0 2px 0 var(--accent-dark); }
 .home-info{ margin-top:26px; color:#666; }
 .home-date{ font-size:1.3em; font-weight:800; color:var(--brand-dark); line-height:1.35; }
 
@@ -63,16 +64,16 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .lv-sub{ font-size:.72em; font-weight:800; opacity:.95; display:flex; align-items:center; gap:8px; }
 .lv-grid{ font-size:1.5em; line-height:1; }
 .lv-easy{ background:var(--accent); box-shadow:0 6px 0 var(--accent-dark); }  /* 初級＝オレンジ（そよぎの「いつもの」と同じ） */
-.lv-easy:active{ box-shadow:0 2px 0 var(--accent-dark); }
+.lv-easy:active, .lv-easy.pressing{ box-shadow:0 2px 0 var(--accent-dark); }
 .lv-mid{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); }
-.lv-mid:active{ box-shadow:0 2px 0 var(--mid-dark); }
+.lv-mid:active, .lv-mid.pressing{ box-shadow:0 2px 0 var(--mid-dark); }
 .lv-hard{ background:var(--brand); box-shadow:0 6px 0 var(--brand-dark); }    /* 上級＝緑（そよぎの「むずかしい」と同じ） */
-.lv-hard:active{ box-shadow:0 2px 0 var(--brand-dark); }
+.lv-hard:active, .lv-hard.pressing{ box-shadow:0 2px 0 var(--brand-dark); }
 
 /* ========== 写真の入手先 ========== */
 .src-btn{ display:flex; align-items:center; gap:14px; justify-content:center; }
 .src-sample{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); }
-.src-sample:active{ box-shadow:0 2px 0 var(--mid-dark); }
+.src-sample:active, .src-sample.pressing{ box-shadow:0 2px 0 var(--mid-dark); }
 .src-loading{ min-height:1.5em; color:#666; font-size:.85em; margin-top:8px; }
 
 /* ========== サンプル（名画）グリッド ========== */
@@ -84,7 +85,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   position:relative;   /* 完成済みバッジ(.sample-done)の基準 */
   border:4px solid var(--line); border-radius:18px; padding:0 0 8px; overflow:hidden;
   background:var(--surface); cursor:pointer; min-width:0; }
-.sample-btn:active{ border-color:var(--brand); transform:scale(.97); }
+.sample-btn:active, .sample-btn.pressing{ border-color:var(--brand); transform:scale(.97); }
 .sample-btn img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; margin-bottom:4px; }
 /* 完成済みサンプルのバッジ（緑丸に白✓・絵の邪魔をしない小ささ） */
 .sample-done{ position:absolute; top:6px; right:6px; z-index:2;
@@ -111,7 +112,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 
 .pz-board{ display:grid; gap:6px; width:min(94vw,560px); aspect-ratio:1;
   touch-action:none; transition:gap .5s; }
-.pcell{ background-repeat:no-repeat; border-radius:10px; cursor:grab;
+.pcell{ background-repeat:no-repeat; border-radius:10px; cursor:grab; touch-action:none;
   box-shadow:0 2px 5px rgba(0,0,0,.25); position:relative; transition:border-radius .5s; }
 .pcell.lifting{ opacity:.35; }
 .pcell.drop-target{ outline:5px solid var(--accent); outline-offset:-2px; z-index:2; }
@@ -135,7 +136,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .hint-btn{ margin-top:18px; min-height:66px; padding:12px 40px;
   font-size:1.05em; font-weight:800; color:#fff; background:var(--accent);
   border:none; border-radius:20px; box-shadow:0 5px 0 var(--accent-dark); cursor:pointer; }
-.hint-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--accent-dark); }
+.hint-btn:active, .hint-btn.pressing{ transform:translateY(3px); box-shadow:0 2px 0 var(--accent-dark); }
 /* ヒントで直したピースを一瞬光らせる（「ここが直った」を伝える） */
 .pcell.hint-fixed{ animation:hintPop 1s ease; z-index:3; }
 @keyframes hintPop{
@@ -166,7 +167,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .rn b{ font-size:1.6em; font-weight:900; color:var(--brand-dark); }
 .streak{ font-size:1.1em; margin-bottom:14px; }
 .other-btn{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); min-height:88px; font-size:1.1em; }
-.other-btn:active{ box-shadow:0 2px 0 var(--mid-dark); }
+.other-btn:active, .other-btn.pressing{ box-shadow:0 2px 0 var(--mid-dark); }
 
 /* ========== 設定 ========== */
 .settings{ justify-content:flex-start; padding-top:40px; }
@@ -208,7 +209,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 /* クレジット（HPリンク・タイトル画面） */
 .credit{ display:inline-block; margin-top:22px; max-width:92%; font-size:.62em; line-height:1.5;
   color:var(--brand-dark); text-decoration:underline; text-align:center; }
-.credit:active{ opacity:.6; }
+.credit:active, .credit.pressing{ opacity:.6; }
 
 /* 「動きを減らす」設定を尊重（強い動きを止める） */
 @media (prefers-reduced-motion: reduce){
@@ -226,7 +227,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .records-btn{ margin-top:22px; min-height:64px; padding:12px 30px; font-size:1.05em; font-weight:800;
   color:#fff; background:var(--brand); border:none; border-radius:18px;
   box-shadow:0 5px 0 var(--brand-dark); cursor:pointer; }
-.records-btn:active{ transform:translateY(3px); box-shadow:0 2px 0 var(--brand-dark); }
+.records-btn:active, .records-btn.pressing{ transform:translateY(3px); box-shadow:0 2px 0 var(--brand-dark); }
 
 /* ===================== 記録（カレンダー） ===================== */
 .records{ justify-content:flex-start; padding:16px 8px 24px; }
@@ -234,7 +235,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   width:100%; max-width:640px; margin:0 auto 12px; }
 .cal-nav{ font-size:1.5em; width:64px; min-height:64px; border:none; color:var(--brand-dark);
   background:var(--surface); border-radius:16px; box-shadow:0 3px 0 var(--line); cursor:pointer; }
-.cal-nav:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
+.cal-nav:active, .cal-nav.pressing{ transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
 .cal-month{ font-size:1.5em; font-weight:900; color:var(--brand-dark); }
 .cal-week{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); width:100%; max-width:640px; margin:0 auto; }
 .cal-wd{ text-align:center; font-size:.8em; color:#8a8a8a; padding:5px 0; }
@@ -243,7 +244,7 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   display:flex; flex-direction:column; align-items:center; padding-top:6px; gap:2px; }
 .cal-cell.empty{ background:transparent; }
 .cal-cell.has{ cursor:pointer; border-color:var(--line); }
-.cal-cell.has:active{ background:var(--tap); }
+.cal-cell.has:active, .cal-cell.has.pressing{ background:var(--tap); }
 .cal-cell.today{ border-color:var(--accent); border-width:3px; }
 .cal-num{ font-size:1.05em; font-weight:800; color:#444; line-height:1; }
 .cal-stars{ font-size:.66em; color:#F5B301; line-height:1; letter-spacing:-1px; min-height:.72em; }

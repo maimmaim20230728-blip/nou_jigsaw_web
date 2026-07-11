@@ -107,7 +107,7 @@ function renderSamples(){
     '</button>'
   ).join('');
   grid.querySelectorAll('.sample-btn').forEach(b=>{
-    b.onclick = ()=>{ Sound.tap(); curImg = b.dataset.src; startPuzzle(); };
+    Tap.bind(b, ()=>{ curImg = b.dataset.src; startPuzzle(); });
   });
 }
 
@@ -119,6 +119,9 @@ function startPuzzle(){
     img: curImg, n: curLevel.n,
     onDone: (stats)=> finishPuzzle(stats),
   });
+  // 見本タップで拡大（.pz-refはstart()が毎回作り直すので、都度bindし直す）
+  const ref = document.querySelector('#game .pz-ref');
+  if(ref) Tap.bind(ref, ()=> openRefZoom(ref.src));
 }
 
 function finishPuzzle(stats){
@@ -133,7 +136,6 @@ function finishPuzzle(stats){
 function openRefZoom(src){
   document.getElementById('refZoomImg').src = src;
   document.getElementById('refZoom').hidden = false;
-  Sound.tap();
 }
 function closeRefZoom(){
   document.getElementById('refZoom').hidden = true;
@@ -186,19 +188,20 @@ function renderSettings(){
     '<button class="lang-btn'+(l.code===CUR?' sel':'')+'" data-c="'+l.code+'">'+l.label+'</button>'
   ).join('');
   lg.querySelectorAll('.lang-btn').forEach(b=>{
-    b.onclick = ()=>{ CUR=b.dataset.c; Store.setLang(CUR); applyI18n(); renderSettings(); Sound.tap(); };
+    Tap.bind(b, ()=>{ CUR=b.dataset.c; Store.setLang(CUR); applyI18n(); renderSettings(); });
   });
   document.querySelectorAll('#sizeRow .size-btn').forEach(b=>{
     b.classList.toggle('sel', b.dataset.s===Store.getScale());
-    b.onclick = ()=>{ setScale(b.dataset.s); renderSettings(); Sound.tap(); };
+    Tap.bind(b, ()=>{ setScale(b.dataset.s); renderSettings(); });
   });
   const sb = document.getElementById('soundBtn');
   sb.textContent = Sound.enabled ? '🔊' : '🔇';
-  sb.onclick = ()=>{ Sound.toggle(); sb.textContent = Sound.enabled ? '🔊' : '🔇'; };
+  // 音ON/OFFボタンは{silent:true}＝押下音を鳴らさず、toggle内の「ON化時の確認音」に任せる
+  Tap.bind(sb, ()=>{ Sound.toggle(); sb.textContent = Sound.enabled ? '🔊' : '🔇'; }, { silent:true });
 
   const mb = document.getElementById('bgmBtn');
   mb.textContent = Bgm.enabled ? '🎵' : '🔇';
-  mb.onclick = ()=>{ const on = Bgm.toggle(); mb.textContent = on ? '🎵' : '🔇'; Sound.tap(); };
+  Tap.bind(mb, ()=>{ const on = Bgm.toggle(); mb.textContent = on ? '🎵' : '🔇'; });
 }
 
 /* ===== ホームの日付（大きく）・日数/回数 ===== */
@@ -271,7 +274,7 @@ function renderRecords(){
       inner += '<div class="cal-badges">'+badges+'</div>';
     }
     cell.innerHTML = inner;
-    if(has) cell.onclick = ()=>{ Sound.tap(); renderDayDetail(key); };
+    if(has) Tap.bind(cell, ()=>{ renderDayDetail(key); });
     grid.appendChild(cell);
   }
 }
@@ -303,33 +306,32 @@ function init(){
   renderHome();
   renderSamples();
 
-  document.getElementById('btnStart').onclick = ()=>{ Sound.tap(); show('level'); };
+  Tap.bind(document.getElementById('btnStart'), ()=>{ show('level'); });
   document.querySelectorAll('.lv-btn').forEach(b=>{
-    b.onclick = ()=>{ Sound.tap(); curLevel = LEVELS.find(l=>l.id===b.dataset.level); show('source'); };
+    Tap.bind(b, ()=>{ curLevel = LEVELS.find(l=>l.id===b.dataset.level); show('source'); });
   });
-  document.getElementById('btnAlbum').onclick  = ()=>{ Sound.tap(); document.getElementById('fileAlbum').click(); };
-  document.getElementById('btnCamera').onclick = ()=>{ Sound.tap(); document.getElementById('fileCamera').click(); };
-  document.getElementById('btnSample').onclick = ()=>{ Sound.tap(); renderSamples(); show('samples'); };  // 開くたびに現在の言語で描き直す
+  Tap.bind(document.getElementById('btnAlbum'),  ()=>{ document.getElementById('fileAlbum').click(); });
+  Tap.bind(document.getElementById('btnCamera'), ()=>{ document.getElementById('fileCamera').click(); });
+  Tap.bind(document.getElementById('btnSample'), ()=>{ renderSamples(); show('samples'); });  // 開くたびに現在の言語で描き直す
   document.getElementById('fileAlbum').addEventListener('change', e=> pickFile(e.target));
   document.getElementById('fileCamera').addEventListener('change', e=> pickFile(e.target));
 
-  document.getElementById('btnHint').onclick = ()=>{ PuzzleGame.hint(); };   // hint()内でSound.swap()を鳴らす
-  // 見本タップで拡大（.pz-refは毎回作り直されるので g-body に委譲）／オーバーレイはどこを押しても閉じる
-  document.querySelector('#game .g-body').addEventListener('click', e=>{
-    const ref = e.target.closest && e.target.closest('.pz-ref');
-    if(ref) openRefZoom(ref.src);
-  });
-  document.getElementById('refZoom').onclick = ()=>{ Sound.tap(); closeRefZoom(); };
+  Tap.bind(document.getElementById('btnHint'), ()=>{ PuzzleGame.hint(); });   // hint()内でSound.swap()を鳴らす
+  // 見本タップの拡大は startPuzzle() 内で .pz-ref に都度 Tap.bind する
+  // 拡大オーバーレイは「どこを押しても閉じる」を長押しでも保証するため pointerup で無条件に閉じる（Tap.bindだと押し込み移動で閉じられなくなる事故があるため）
+  const refZoom = document.getElementById('refZoom');
+  refZoom.addEventListener('pointerup', ()=>{ Sound.tap(); closeRefZoom(); });
+  refZoom.addEventListener('contextmenu', e=> e.preventDefault());
 
-  document.getElementById('btnQuit').onclick = ()=>{ Sound.tap(); PuzzleGame.stop(); renderHome(); show('home'); };
-  document.getElementById('btnAgain').onclick = ()=>{ Sound.tap(); startPuzzle(); };
-  document.getElementById('btnOther').onclick = ()=>{ Sound.tap(); show('source'); };
+  Tap.bind(document.getElementById('btnQuit'),  ()=>{ PuzzleGame.stop(); renderHome(); show('home'); });
+  Tap.bind(document.getElementById('btnAgain'), ()=>{ startPuzzle(); });
+  Tap.bind(document.getElementById('btnOther'), ()=>{ show('source'); });
 
-  document.getElementById('btnGear').onclick  = ()=>{ Sound.tap(); renderSettings(); show('settings'); };
-  document.getElementById('btnRecords').onclick = ()=>{ Sound.tap(); openRecords(); };
-  document.getElementById('calPrev').onclick  = ()=>{ Sound.tap(); calShift(-1); };
-  document.getElementById('calNext').onclick  = ()=>{ Sound.tap(); calShift(1); };
-  document.querySelectorAll('[data-home]').forEach(b=> b.onclick = ()=>{ Sound.tap(); PuzzleGame.stop(); renderHome(); show('home'); });
+  Tap.bind(document.getElementById('btnGear'),  ()=>{ renderSettings(); show('settings'); });
+  Tap.bind(document.getElementById('btnRecords'), ()=>{ openRecords(); });
+  Tap.bind(document.getElementById('calPrev'),  ()=>{ calShift(-1); });
+  Tap.bind(document.getElementById('calNext'),  ()=>{ calShift(1); });
+  document.querySelectorAll('[data-home]').forEach(b=> Tap.bind(b, ()=>{ PuzzleGame.stop(); renderHome(); show('home'); }));
 
   show('home');
   Bgm.start();   // 起動時に自動でBGM開始（PWA/Androidは即・Webは制限で最初の操作時に自動発火）

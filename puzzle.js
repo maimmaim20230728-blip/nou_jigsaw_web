@@ -127,6 +127,7 @@ const PuzzleGame = (() => {
         '<div class="pz-board" id="pzBoard" style="grid-template-columns:repeat('+n+',1fr)"></div>';
 
       boardEl = container.querySelector('#pzBoard');
+      boardEl.addEventListener('contextmenu', e=> e.preventDefault());  // ピース長押しでOSメニューを出さない
       boardEl.style.setProperty('--pz-img', 'url("'+imgUrl+'")');
       statTime = container.querySelector('#pzTime');
       statMoves = container.querySelector('#pzMoves');

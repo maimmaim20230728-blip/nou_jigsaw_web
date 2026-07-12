@@ -1,5 +1,5 @@
 /* Service Worker ― 完全オフライン動作（全ファイルを端末にキャッシュ） */
-const CACHE = 'soyogi-jigsaw-v8';
+const CACHE = 'soyogi-jigsaw-v9';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'tap.js', 'puzzle.js',
   'data/config.js', 'data/lang.js',

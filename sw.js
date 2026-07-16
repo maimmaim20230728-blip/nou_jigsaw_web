@@ -1,5 +1,5 @@
 /* Service Worker ― 完全オフライン動作（全ファイルを端末にキャッシュ） */
-const CACHE = 'soyogi-jigsaw-v9';
+const CACHE = 'soyogi-jigsaw-v10';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'tap.js', 'puzzle.js',
   'data/config.js', 'data/lang.js',
@@ -30,13 +30,18 @@ self.addEventListener('activate', e=>{
   self.clients.claim();
 });
 self.addEventListener('fetch', e=>{
-  if(e.request.method !== 'GET') return;
-  if(new URL(e.request.url).origin !== self.location.origin) return;  // 外部originはSW介入しない
+  const req = e.request;
+  if(req.method !== 'GET') return;
+  if(new URL(req.url).origin !== self.location.origin) return;  // 外部originはSW介入しない
   e.respondWith(
-    caches.match(e.request).then(hit=> hit || fetch(e.request).then(res=>{
+    caches.match(req).then(hit=> hit || fetch(req).then(res=>{
       const copy = res.clone();
-      caches.open(CACHE).then(c=>c.put(e.request, copy)).catch(()=>{});
+      caches.open(CACHE).then(c=>c.put(req, copy)).catch(()=>{});
       return res;
-    }).catch(()=> hit))
+    }).catch(()=>{
+      // オフライン等でネットも失敗: ページ遷移要求ならキャッシュ済みの index.html を殻として返す
+      if(req.mode === 'navigate') return caches.match('index.html');
+      return Response.error();
+    }))
   );
 });

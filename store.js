@@ -51,7 +51,8 @@ const Store = (() => {
       const row = all[day] || { sessions: [] };
       if(!row.sessions) row.sessions = [];
       row.sessions.push({ level:session.level, pieces:session.pieces,
-        timeSec:session.timeSec, moves:session.moves, at: Date.now() });
+        timeSec:session.timeSec, moves:session.moves,
+        sampleId: session.sampleId || null, at: Date.now() });   // B-5: 名画のみid・写真はnull
       all[day] = row;
       save(all);
       return row;

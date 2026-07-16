@@ -70,6 +70,7 @@
   <!-- ========== サンプル（名画）選択 ========== -->
   <section id="samples" class="screen">
     <h2 data-i18n="useSample">サンプルを つかう</h2>
+    <div id="sampleProgress" class="sample-progress"></div>
     <div id="sampleGrid" class="sample-grid"></div>
     <button class="link-back" data-home data-i18n="back">ホームにもどる</button>
   </section>
@@ -129,6 +130,7 @@
 
   <!-- ========== 見本の拡大表示（パズル中に見本をタップ） ========== -->
   <div id="refZoom" class="ref-zoom" hidden>
+    <div id="refZoomLabel" class="ref-zoom-label" hidden></div>
     <button id="refZoomClose" class="ref-zoom-close" aria-label="close">✕</button>
     <img id="refZoomImg" class="ref-zoom-img" src="" alt="">
   </div>

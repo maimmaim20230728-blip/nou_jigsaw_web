@@ -33,6 +33,13 @@ for (const l of LANGS) {
   for (const k of keys) if (!jaKeys.includes(k)) errs.push(l.code + '.ui に余剰キー: ' + k);
 }
 
+/* ②' 必須キーの存在＆非空（プレビュー案内 makeThis など画面外で参照するキーの取りこぼし防止） */
+const REQUIRED_UI = ['makeThis', 'hint', 'photoError'];
+for (const l of LANGS) {
+  const ui = LANG[l.code].ui || {};
+  for (const k of REQUIRED_UI) if (!ui[k]) errs.push(l.code + '.ui に必須キーが無い/空: ' + k);
+}
+
 /* ③ SAMPLES と art 辞書 */
 const ids = SAMPLES.map(s => s.id);
 const dup = ids.filter((v, i) => ids.indexOf(v) !== i);

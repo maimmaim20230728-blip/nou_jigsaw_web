@@ -9,7 +9,11 @@ const PuzzleGame = (() => {
   let perm = [];          // perm[セル位置] = そこに置かれているピース番号
   let n = 3, imgUrl = '';
   let moves = 0, startAt = 0, timerId = null, finished = false;
-  let boardEl = null, statTime = null, statMoves = null, doneCb = null;
+  let boardEl = null, statTime = null, statMoves = null, doneCb = null, commitCb = null;
+  let dragPid = null;     // A-2: いま掴んでいる指(pointerId)。1本だけ受け付けマルチタッチ混線を防ぐ
+  let doneTimer = null;   // A-3: 完成演出→結果画面へのタイマーID（stopで掃除）
+  let stopped = false;    // A-3: stop()で中断済みなら結果画面への遷移を発火させない
+  let committed = false;  // 記録の確定（commit）は完成検出の瞬間に1回だけ発火
 
   function fmtTime(sec){
     const m = Math.floor(sec/60), s = sec%60;
@@ -48,22 +52,34 @@ const PuzzleGame = (() => {
   }
 
   function checkDone(){
+    if(finished) return;                       // 完成処理は一度だけ（冪等）
     if(!perm.every((v,i)=>v===i)) return;
     finished = true;
     if(timerId){ clearInterval(timerId); timerId = null; }
     const timeSec = Math.floor((Date.now()-startAt)/1000);
 
+    // 記録の確定は完成検出のこの瞬間に即実行（1回だけ）。
+    // 完成演出中(1.8秒)に離脱しても記録・図鑑✓が残るよう、遷移(doneCb)より前に必ずコミットする。
+    if(commitCb && !committed){ committed = true; commitCb({ timeSec, moves }); }
+
     // 隙間を消して1枚の絵に戻す完成演出
     boardEl.classList.add('done');
     Sound.fanfare();
-    setTimeout(()=>{ if(doneCb) doneCb({ timeSec, moves }); }, 1800);
+    // 1.8秒後の doneTimer は「結果画面への遷移」専用。stop() で掃除・中断済みなら遷移しない
+    doneTimer = setTimeout(()=>{
+      doneTimer = null;
+      if(doneCb && !stopped) doneCb();
+    }, 1800);
   }
 
   /* ---- ドラッグ&ドロップ（Pointer Events） ---- */
   function attachDrag(cell){
     cell.addEventListener('pointerdown', (ev)=>{
       if(finished) return;
+      if(!ev.isPrimary) return;      // A-2: 主ポインタ以外（2本目以降の指）は無視
+      if(dragPid !== null) return;   // A-2: すでにドラッグ中なら新規ドラッグを始めない
       ev.preventDefault();
+      dragPid = ev.pointerId;        // A-2: このドラッグのポインタを固定
       const from = Number(cell.dataset.i);
       const rect = cell.getBoundingClientRect();
 
@@ -79,7 +95,18 @@ const PuzzleGame = (() => {
       cell.classList.add('lifting');
 
       let hover = null;
+      // ドラッグ終了の後片付け（ゴースト除去・状態復帰・ポインタ解放）
+      const cleanup = ()=>{
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onCancel);
+        if(hover) hover.classList.remove('drop-target');
+        ghost.remove();
+        cell.classList.remove('lifting');
+        dragPid = null;
+      };
       const onMove = (e)=>{
+        if(e.pointerId !== dragPid) return;   // A-2: このドラッグ以外のポインタは無視
         place(e.clientX, e.clientY);
         const t = document.elementFromPoint(e.clientX, e.clientY);
         const c = t && t.closest ? t.closest('.pcell') : null;
@@ -88,14 +115,11 @@ const PuzzleGame = (() => {
         if(hover) hover.classList.add('drop-target');
       };
       const onUp = (e)=>{
-        document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
-        document.removeEventListener('pointercancel', onUp);
-        ghost.remove();
-        cell.classList.remove('lifting');
-        if(hover){
-          hover.classList.remove('drop-target');
-          const to = Number(hover.dataset.i);
+        if(e.pointerId !== dragPid) return;   // A-2: 固定した指の離しだけ処理
+        const target = hover;
+        cleanup();
+        if(target){
+          const to = Number(target.dataset.i);
           [perm[from], perm[to]] = [perm[to], perm[from]];
           moves++;
           statMoves.textContent = moves;
@@ -104,17 +128,23 @@ const PuzzleGame = (() => {
           checkDone();
         }
       };
+      const onCancel = (e)=>{
+        if(e.pointerId !== dragPid) return;   // A-2: pointercancelでも安全に終了（入れ替えはしない）
+        cleanup();
+      };
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
-      document.addEventListener('pointercancel', onUp);
+      document.addEventListener('pointercancel', onCancel);
     });
   }
 
   return {
     /* opts = { img:dataURL/URL, n:分割数, onDone(stats) } */
     start(container, opts){
-      n = opts.n; imgUrl = opts.img; doneCb = opts.onDone;
+      n = opts.n; imgUrl = opts.img; doneCb = opts.onDone; commitCb = opts.onCommit;
       moves = 0; finished = false; perm = shuffled();
+      dragPid = null; stopped = false; committed = false;   // 前回の残りをリセット
+      if(doneTimer){ clearTimeout(doneTimer); doneTimer = null; }
 
       container.innerHTML =
         '<div class="pz-top">' +
@@ -167,7 +197,9 @@ const PuzzleGame = (() => {
     /* 途中でやめた時の後片付け（記録しない） */
     stop(){
       finished = true;
+      stopped = true;   // A-3: 完成演出中でも結果画面へ引き戻さない
       if(timerId){ clearInterval(timerId); timerId = null; }
+      if(doneTimer){ clearTimeout(doneTimer); doneTimer = null; }
     },
   };
 })();

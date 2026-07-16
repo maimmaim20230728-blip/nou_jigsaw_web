@@ -423,6 +423,26 @@ Object.keys(LANG).forEach(k=>{
   LANG[k].ui.photoError = PHOTOERR[k] || PHOTOERR.en;
 });
 
+/* ---- 開始前の完成図プレビューの案内ラベル（2026-07-17ブラッシュアップ・15言語） ---- */
+const MAKETHIS = {
+  ja:'この えを つくるよ！タップで スタート',
+  en:"Let's make this picture! Tap to start",
+  zh:'要拼这幅画哦！点击开始',
+  'zh-TW':'要拼這幅畫喔！點擊開始',
+  ko:'이 그림을 만들어요! 탭하면 시작',
+  es:'¡Haremos esta imagen! Toca para empezar',
+  pt:'Vamos montar esta imagem! Toque para começar',
+  fr:'On va faire cette image ! Touchez pour commencer',
+  de:'Dieses Bild legen wir! Zum Start tippen',
+  it:'Faremo questa immagine! Tocca per iniziare',
+  nl:'Deze afbeelding gaan we maken! Tik om te starten',
+  pl:'Ułożymy ten obrazek! Dotknij, aby zacząć',
+  ru:'Соберём эту картину! Коснитесь, чтобы начать',
+  tr:'Bu resmi yapacağız! Başlamak için dokun',
+  hi:'यह चित्र बनाएँगे! शुरू करने के लिए टैप करें',
+};
+Object.keys(LANG).forEach(k=>{ LANG[k].ui.makeThis = MAKETHIS[k] || MAKETHIS.en; });
+
 /* ---- プレイ回数ラベルと単位（日／回）。単位はCJK/韓のみ表示、他は空（見出しで足りる） ---- */
 const PLAYCOUNT = {
   ja:'プレイ回数', en:'Times played', zh:'游玩次数', 'zh-TW':'遊玩次數', ko:'플레이 횟수',

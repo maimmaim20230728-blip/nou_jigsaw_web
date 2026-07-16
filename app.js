@@ -98,10 +98,14 @@ async function pickFile(input){
 function renderSamples(){
   const grid = document.getElementById('sampleGrid');
   const art = I18N.art || LANG.en.art;
+  // コレクション進捗「✓ N / 36」（記号＋数字のみ・翻訳不要）
+  const done = SAMPLES.filter(s=>Store.isDone(s.id)).length;
+  const prog = document.getElementById('sampleProgress');
+  if(prog) prog.textContent = '✓ ' + done + ' / ' + SAMPLES.length;
   grid.innerHTML = SAMPLES.map(s=>
     '<button class="sample-btn" data-src="'+s.src+'">'+
       (Store.isDone(s.id) ? '<span class="sample-done" aria-hidden="true">✓</span>' : '') +
-      '<img src="'+s.src+'" alt="'+(art[s.id]||'')+'">'+
+      '<img src="'+s.src+'" alt="'+(art[s.id]||'')+'" loading="lazy" decoding="async">'+
       '<span class="sample-t">'+(art[s.id]||'')+'</span>'+
       '<span class="sample-a">'+(art[s.artist]||'')+'</span>'+
     '</button>'
@@ -112,46 +116,92 @@ function renderSamples(){
 }
 
 /* ===== パズル開始・完成 ===== */
+let pendingStart = false;   // プレビュー表示中＝閉じたらパズルを始める合図
+
+/* B-1: まず完成図を全画面プレビュー（refZoomを再利用）。閉じてから本編開始＝タイマーはプレビュー後 */
 function startPuzzle(){
   if(!curLevel || !curImg) return;
+  pendingStart = true;
+  const label = document.getElementById('refZoomLabel');
+  if(label){ label.textContent = t('makeThis'); label.hidden = false; }   // プレビュー時のみ案内ラベルを出す
+  document.getElementById('refZoomImg').src = curImg;
+  document.getElementById('refZoom').hidden = false;
+}
+
+let pendingResult = null;   // 完成コミット時に確定した結果（1.8秒後の結果画面表示で使う）
+
+/* プレビューを閉じた後に呼ばれる本編開始 */
+function beginGame(){
+  pendingResult = null;
   show('game');
   PuzzleGame.start(document.querySelector('#game .g-body'), {
     img: curImg, n: curLevel.n,
-    onDone: (stats)=> finishPuzzle(stats),
+    onCommit: (stats)=> commitFinish(stats),   // 完成検出の瞬間＝記録の確定
+    onDone:   ()=> showResult(),               // 1.8秒後＝結果画面への遷移のみ
   });
   // 見本タップで拡大（.pz-refはstart()が毎回作り直すので、都度bindし直す）
   const ref = document.querySelector('#game .pz-ref');
   if(ref) Tap.bind(ref, ()=> openRefZoom(ref.src));
 }
 
-function finishPuzzle(stats){
-  Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves });
+/* 完成の確定（記録・図鑑✓・🏆判定）＝完成検出の瞬間に1回だけ。
+   演出中(1.8秒)に「ホームにもどる」や✕で離脱しても記録と図鑑✓が残るよう、
+   結果画面への遷移(showResult)とは切り離してここで必ず保存する。 */
+function commitFinish(stats){
   const sample = SAMPLES.find(s=> s.src === curImg);   // サンプル（名画）を完成したら図鑑に登録
-  if(sample) Store.markDone(sample.id);
-  renderResult(stats);
+  Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves,
+    sampleId: sample ? sample.id : null });            // 名画のみid保存・写真はnull（後方互換）
+  let allDone = false;
+  if(sample){
+    const before = SAMPLES.filter(s=>Store.isDone(s.id)).length;
+    Store.markDone(sample.id);
+    const after = SAMPLES.filter(s=>Store.isDone(s.id)).length;
+    allDone = (before < SAMPLES.length && after === SAMPLES.length);   // 36/36を今回達成した瞬間だけ
+  }
+  pendingResult = { stats, sample, allDone };          // 表示は確定済みのこの値を使う
+}
+
+/* 1.8秒後の結果画面表示（確定済みの pendingResult を描画するだけ・記録はしない） */
+function showResult(){
+  if(!pendingResult) return;
+  const { stats, sample, allDone } = pendingResult;
+  pendingResult = null;
+  renderResult(stats, sample, allDone);
   show('result');
 }
 
 /* ===== 見本の拡大表示（パズル中に見本をタップ→画面いっぱいに） ===== */
 function openRefZoom(src){
+  const label = document.getElementById('refZoomLabel');
+  if(label){ label.hidden = true; label.textContent = ''; }   // 途中の見本拡大では案内ラベルを出さない
   document.getElementById('refZoomImg').src = src;
   document.getElementById('refZoom').hidden = false;
 }
 function closeRefZoom(){
   document.getElementById('refZoom').hidden = true;
   document.getElementById('refZoomImg').src = '';
+  const label = document.getElementById('refZoomLabel');
+  if(label){ label.hidden = true; label.textContent = ''; }
 }
 
 /* ===== 結果画面 ===== */
-function renderResult(stats){
+function renderResult(stats, sample, allDone){
   const stars = Store.starsFor(curLevel.id, stats.timeSec);
   const starHtml = Array.from({length:stars}, (_,i)=>
     '<span style="animation-delay:'+(i*0.22)+'s">⭐</span>').join('');
   const m = Math.floor(stats.timeSec/60), s = stats.timeSec%60;
+  // B-2: サンプル（名画）のときは写真の下に作品名＋作者を表示（写真パズルは何も出さない）
+  const art = I18N.art || LANG.en.art;
+  const artHtml = sample
+    ? '<div class="result-art"><div class="ra-title">'+(art[sample.id]||'')+'</div>'+
+        '<div class="ra-artist">'+(art[sample.artist]||'')+'</div></div>'
+    : '';
   const el = document.getElementById('resultBody');
   el.innerHTML =
     '<div class="stars">'+starHtml+'</div>' +
     '<img class="result-photo" src="'+curImg+'" alt="">' +
+    artHtml +
+    (allDone ? '<div class="result-trophy" aria-hidden="true">🏆</div>' : '') +   // B-3: コレクション完成の控えめな祝い
     '<div class="result-nums">' +
       '<div class="rn"><span class="rn-cap">'+t('timeLabel')+'</span><b>'+m+':'+String(s).padStart(2,'0')+'</b></div>' +
       '<div class="rn"><span class="rn-cap">'+t('movesLabel')+'</span><b>'+stats.moves+'</b></div>' +
@@ -182,6 +232,29 @@ function setScale(s){
   document.body.classList.remove('scale-M','scale-L','scale-XL');
   document.body.classList.add('scale-'+s);
 }
+/* A-1: 静的要素（サイズ/音/BGMボタン）へのTap.bindは init から一度だけ。
+   renderSettings を開くたびに bind すると同じ要素にリスナーが積み重なるため分離する。 */
+function bindSettingsStatic(){
+  document.querySelectorAll('#sizeRow .size-btn').forEach(b=>{
+    Tap.bind(b, ()=>{ setScale(b.dataset.s); reflectSettings(); });
+  });
+  const sb = document.getElementById('soundBtn');
+  // 音ON/OFFボタンは{silent:true}＝押下音を鳴らさず、toggle内の「ON化時の確認音」に任せる
+  Tap.bind(sb, ()=>{ Sound.toggle(); sb.textContent = Sound.enabled ? '🔊' : '🔇'; }, { silent:true });
+  const mb = document.getElementById('bgmBtn');
+  Tap.bind(mb, ()=>{ const on = Bgm.toggle(); mb.textContent = on ? '🎵' : '🔇'; });
+}
+
+/* 状態反映だけ（選択中サイズのsel・音/BGMアイコン）。bindは張らない＝何度呼んでも安全。 */
+function reflectSettings(){
+  document.querySelectorAll('#sizeRow .size-btn').forEach(b=>{
+    b.classList.toggle('sel', b.dataset.s===Store.getScale());
+  });
+  document.getElementById('soundBtn').textContent = Sound.enabled ? '🔊' : '🔇';
+  document.getElementById('bgmBtn').textContent   = Bgm.enabled ? '🎵' : '🔇';
+}
+
+/* 言語ボタンだけは押すたびに全再生成（押した言語をselにするため）＝動的要素なのでここでbind。 */
 function renderSettings(){
   const lg = document.getElementById('langGrid');
   lg.innerHTML = LANGS.map(l=>
@@ -190,18 +263,7 @@ function renderSettings(){
   lg.querySelectorAll('.lang-btn').forEach(b=>{
     Tap.bind(b, ()=>{ CUR=b.dataset.c; Store.setLang(CUR); applyI18n(); renderSettings(); });
   });
-  document.querySelectorAll('#sizeRow .size-btn').forEach(b=>{
-    b.classList.toggle('sel', b.dataset.s===Store.getScale());
-    Tap.bind(b, ()=>{ setScale(b.dataset.s); renderSettings(); });
-  });
-  const sb = document.getElementById('soundBtn');
-  sb.textContent = Sound.enabled ? '🔊' : '🔇';
-  // 音ON/OFFボタンは{silent:true}＝押下音を鳴らさず、toggle内の「ON化時の確認音」に任せる
-  Tap.bind(sb, ()=>{ Sound.toggle(); sb.textContent = Sound.enabled ? '🔊' : '🔇'; }, { silent:true });
-
-  const mb = document.getElementById('bgmBtn');
-  mb.textContent = Bgm.enabled ? '🎵' : '🔇';
-  Tap.bind(mb, ()=>{ const on = Bgm.toggle(); mb.textContent = on ? '🎵' : '🔇'; });
+  reflectSettings();
 }
 
 /* ===== ホームの日付（大きく）・日数/回数 ===== */
@@ -287,14 +349,18 @@ function renderDayDetail(key){
   }
   const lname = { easy:t('levelEasy'), mid:t('levelMid'), hard:t('levelHard') };
   const lcls  = { easy:'e', mid:'m', hard:'h' };
+  const art   = I18N.art || LANG.en.art;
   let html = '<div class="dd-title">'+title+'</div>';
   data.sessions.forEach(s=>{
     const stars = Store.starsFor(s.level, s.timeSec);
     const m = Math.floor(s.timeSec/60), sec = s.timeSec%60;
+    // B-5: 名画idがある記録は作品名を添える（旧データはsampleId無し→非表示・後方互換）
+    const artName = (s.sampleId && art[s.sampleId]) ? art[s.sampleId] : '';
     html += '<div class="dd-row"><div class="dd-head">'+
       '<span class="dd-mode '+(lcls[s.level]||'e')+'">'+(lname[s.level]||s.level)+' '+s.pieces+'</span>'+
       '<span class="dd-score">'+m+':'+String(sec).padStart(2,'0')+' / '+s.moves+'</span>'+
-      '<span class="dd-stars">'+'⭐'.repeat(stars)+'</span></div></div>';
+      '<span class="dd-stars">'+'⭐'.repeat(stars)+'</span></div>'+
+      (artName ? '<div class="dd-art">'+artName+'</div>' : '')+'</div>';
   });
   el.innerHTML = html;
 }
@@ -317,10 +383,15 @@ function init(){
   document.getElementById('fileCamera').addEventListener('change', e=> pickFile(e.target));
 
   Tap.bind(document.getElementById('btnHint'), ()=>{ PuzzleGame.hint(); });   // hint()内でSound.swap()を鳴らす
-  // 見本タップの拡大は startPuzzle() 内で .pz-ref に都度 Tap.bind する
+  bindSettingsStatic();   // A-1: 設定の静的ボタンは起動時に一度だけbind
+  // 見本タップの拡大は beginGame() 内で .pz-ref に都度 Tap.bind する
   // 拡大オーバーレイは「どこを押しても閉じる」を長押しでも保証するため pointerup で無条件に閉じる（Tap.bindだと押し込み移動で閉じられなくなる事故があるため）
   const refZoom = document.getElementById('refZoom');
-  refZoom.addEventListener('pointerup', ()=>{ Sound.tap(); closeRefZoom(); });
+  refZoom.addEventListener('pointerup', ()=>{
+    Sound.tap();
+    closeRefZoom();
+    if(pendingStart){ pendingStart = false; beginGame(); }   // B-1: プレビューを閉じたら本編開始
+  });
   refZoom.addEventListener('contextmenu', e=> e.preventDefault());
 
   Tap.bind(document.getElementById('btnQuit'),  ()=>{ PuzzleGame.stop(); renderHome(); show('home'); });

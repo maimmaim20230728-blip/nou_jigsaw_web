@@ -443,6 +443,29 @@ const MAKETHIS = {
 };
 Object.keys(LANG).forEach(k=>{ LANG[k].ui.makeThis = MAKETHIS[k] || MAKETHIS.en; });
 
+/* ---- Android の戻るボタン: パズルの とちゅうの確かめ（はい／いいえ）（2026-09-30・15言語）
+        とちゅうで やめますか？ は脳活そよぎの「やめる」確認と同じ訳 ---- */
+const QUITASK = {
+  ja:'とちゅうで やめますか？', en:'Stop here?', zh:'要中途退出吗？', 'zh-TW':'要中途退出嗎？', ko:'여기서 그만할까요?',
+  es:'¿Salir ahora?', pt:'Sair agora?', fr:'Arrêter ici ?', de:'Jetzt beenden?', it:'Vuoi uscire?',
+  nl:'Nu stoppen?', pl:'Zakończyć teraz?', ru:'Закончить сейчас?', tr:'Şimdi bitirelim mi?', hi:'अभी बंद करें?',
+};
+const YES_ = {
+  ja:'はい', en:'Yes', zh:'是', 'zh-TW':'是', ko:'네',
+  es:'Sí', pt:'Sim', fr:'Oui', de:'Ja', it:'Sì',
+  nl:'Ja', pl:'Tak', ru:'Да', tr:'Evet', hi:'हाँ',
+};
+const NO_ = {
+  ja:'いいえ', en:'No', zh:'否', 'zh-TW':'否', ko:'아니요',
+  es:'No', pt:'Não', fr:'Non', de:'Nein', it:'No',
+  nl:'Nee', pl:'Nie', ru:'Нет', tr:'Hayır', hi:'नहीं',
+};
+Object.keys(LANG).forEach(k=>{
+  LANG[k].ui.quitAsk = QUITASK[k];   // 英語で埋めない(欠けは _check.js の必須キーで見つける)
+  LANG[k].ui.yes     = YES_[k];
+  LANG[k].ui.no      = NO_[k];
+});
+
 /* ---- プレイ回数ラベルと単位（日／回）。単位はCJK/韓のみ表示、他は空（見出しで足りる） ---- */
 const PLAYCOUNT = {
   ja:'プレイ回数', en:'Times played', zh:'游玩次数', 'zh-TW':'遊玩次數', ko:'플레이 횟수',

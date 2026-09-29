@@ -34,7 +34,7 @@ for (const l of LANGS) {
 }
 
 /* ②' 必須キーの存在＆非空（プレビュー案内 makeThis など画面外で参照するキーの取りこぼし防止） */
-const REQUIRED_UI = ['makeThis', 'hint', 'photoError'];
+const REQUIRED_UI = ['makeThis', 'hint', 'photoError', 'quitAsk', 'yes', 'no'];   // quitAsk/yes/no = Play版の戻るボタンの確かめ(2026-09-30)
 for (const l of LANGS) {
   const ui = LANG[l.code].ui || {};
   for (const k of REQUIRED_UI) if (!ui[k]) errs.push(l.code + '.ui に必須キーが無い/空: ' + k);

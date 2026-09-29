@@ -312,3 +312,22 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .dd-score{ font-size:1.05em; font-weight:900; color:var(--text); }
 .dd-stars{ margin-left:auto; font-size:1em; }
 .dd-art{ font-size:.78em; font-weight:700; color:#777; margin-top:6px; }   /* 名画idのある記録に作品名 */
+
+/* ===================== 確かめの窓（Play版の戻るボタン・2026-09-30） ===================== */
+/* パズルの とちゅうで端末の戻るを押したときの「とちゅうで やめますか？」（app.js askBox）。
+   脳活そよぎの「やめる」確認と同じ見た目。見本の拡大(80)より上。いいえ＝安全側を上に置く */
+.ask-ov{ position:fixed; inset:0; z-index:90;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.42);
+  padding:max(24px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px))
+          max(24px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px)); }
+.ask-box{ background:var(--surface); border-radius:24px; padding:28px 24px;
+  width:100%; max-width:420px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+.ask-msg{ font-size:1.2em; font-weight:800; color:var(--text); margin-bottom:22px; line-height:1.4;
+  word-break:keep-all; overflow-wrap:anywhere; }   /* 分かち書きの空白で折る(語の途中で切らない) */
+.ask-row{ display:flex; flex-direction:column; gap:14px; }
+.ask-btn{ font:inherit; min-height:80px; font-size:1.15em; font-weight:800; color:#fff;
+  border:none; border-radius:18px; cursor:pointer; }
+.ask-no{ background:var(--brand); box-shadow:0 5px 0 var(--brand-dark); }   /* いいえ＝つづける＝緑（安全側） */
+.ask-yes{ background:var(--wrong); box-shadow:0 5px 0 #8E1D1D; }            /* はい＝やめる＝赤 */
+.ask-btn:active,.ask-btn.pressing{ transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.3); }

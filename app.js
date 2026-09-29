@@ -365,12 +365,94 @@ function renderDayDetail(key){
   el.innerHTML = html;
 }
 
+/* ===== Android の戻るボタン（Play版だけ・2026-09-30） =====
+   @capacitor/app が無いと、戻るを押すとアプリごと後ろに下がっていた（Android 11 以前は閉じる）。
+   押したときの順: ①確かめの窓が出ていたら「いいえ」
+                  ①見本の拡大・はじめる前の完成図なら、とじる（完成図は はじめずに とじる＝もとの画面のまま）
+                  ②パズルの とちゅうなら「とちゅうで やめますか？」を出す（はい＝ホーム。とちゅうの記録は残らないので いきなり やめない）
+                    完成したあと（記録は保存ずみ）は ③と同じ
+                  ③ほかの画面は「ホームにもどる」と同じ
+                  ④ホームなら、アプリを後ろに下げる（minimizeApp。記録はそのまま）
+   🔴 プラグインはネイティブが入れる Capacitor.Plugins.App を使う（registerPlugin は WebView に無い）
+   Web版（ブラウザ）は何もしない（戻るはブラウザのまま） */
+function isNativeApp(){
+  try{ const c = window.Capacitor; return !!(c && typeof c.isNativePlatform === 'function' && c.isNativePlatform()); }catch(e){ return false; }
+}
+function nativeApp(fn){
+  try{
+    const c = window.Capacitor;
+    if(typeof c.isPluginAvailable === 'function' && !c.isPluginAvailable('App')) return null;
+    const p = c.Plugins && c.Plugins.App;
+    return (p && typeof p[fn] === 'function') ? p : null;
+  }catch(e){ return null; }
+}
+function minimizeApp(){
+  const ap = nativeApp('minimizeApp');
+  try{ if(ap){ const p = ap.minimizeApp(); if(p && p.catch) p.catch(()=>{}); } }catch(e){}
+}
+/* アプリの中の確かめの窓（いいえ／はい）。Play版の window.confirm はボタンが英語の OK / Cancel に
+   決め打ちされている（Capacitor）ので、Play版はこの窓を出す。Web版は今までどおり window.confirm。
+   done(true=はい / false=いいえ)。戻るボタン＝いいえ */
+function askBox(msg, done){
+  if(!isNativeApp()){
+    let r = false;
+    try{ if(typeof window.confirm === 'function') r = !!window.confirm(msg); }catch(e){ r = false; }
+    done(r);
+    return;
+  }
+  const ov = document.createElement('div');
+  ov.className = 'ask-ov';
+  ov.setAttribute('role', 'alertdialog');
+  ov.setAttribute('aria-modal', 'true');
+  ov.innerHTML = '<div class="ask-box"><div class="ask-msg"></div><div class="ask-row">' +
+    '<button type="button" class="ask-btn ask-no" data-back="1"></button>' +
+    '<button type="button" class="ask-btn ask-yes"></button></div></div>';
+  ov.querySelector('.ask-msg').textContent = msg;
+  const no = ov.querySelector('.ask-no'), yes = ov.querySelector('.ask-yes');
+  no.textContent = t('no'); yes.textContent = t('yes');
+  let closed = false;
+  const close = (v)=>{ if(closed) return; closed = true; ov.remove(); done(v); };
+  Tap.bind(no,  ()=> close(false));
+  Tap.bind(yes, ()=> close(true));
+  // 読み上げ(TalkBack)・キーボードは click だけを出す（tap.js は pointer だけを見る）ので、この窓の2つは click も受ける
+  no.addEventListener('click',  ()=> close(false));
+  yes.addEventListener('click', ()=> close(true));
+  ov.addEventListener('contextmenu', e=> e.preventDefault());
+  document.body.appendChild(ov);
+  try{ no.focus(); }catch(e){}
+}
+function goHomeFromAnywhere(){ PuzzleGame.stop(); renderHome(); show('home'); }   // 「ホームにもどる」と同じ
+function onBack(){
+  const ask = document.querySelector('.ask-ov');
+  if(ask){ const no = ask.querySelector('.ask-no'); if(no) no.click(); return; }   // ① 確かめの窓＝いいえ
+  if(!document.getElementById('refZoom').hidden){                                  // ① 見本の拡大・完成図
+    pendingStart = false;   // はじめる前の完成図なら、はじめない
+    closeRefZoom();
+    return;
+  }
+  const cur = document.querySelector('.screen.active');
+  const id = cur ? cur.id : 'home';
+  if(id === 'game' && !pendingResult){                                             // ② パズルの とちゅう
+    askBox(t('quitAsk'), (ok)=>{ if(ok) goHomeFromAnywhere(); });
+    return;
+  }
+  if(id !== 'home'){ goHomeFromAnywhere(); return; }                               // ③
+  minimizeApp();                                                                    // ④
+}
+function watchBack(){
+  if(!isNativeApp()) return;
+  const ap = nativeApp('addListener');
+  if(!ap) return;
+  try{ const r = ap.addListener('backButton', ()=>{ onBack(); }); if(r && r.catch) r.catch(()=>{}); }catch(e){}
+}
+
 /* ===== 起動 ===== */
 function init(){
   setScale(Store.getScale());
   applyI18n();
   renderHome();
   renderSamples();
+  watchBack();            // Android の戻るボタン（Play版だけ）
 
   Tap.bind(document.getElementById('btnStart'), ()=>{ show('level'); });
   document.querySelectorAll('.lv-btn').forEach(b=>{
@@ -387,7 +469,8 @@ function init(){
   // 見本タップの拡大は beginGame() 内で .pz-ref に都度 Tap.bind する
   // 拡大オーバーレイは「どこを押しても閉じる」を長押しでも保証するため pointerup で無条件に閉じる（Tap.bindだと押し込み移動で閉じられなくなる事故があるため）
   const refZoom = document.getElementById('refZoom');
-  refZoom.addEventListener('pointerup', ()=>{
+  refZoom.addEventListener('pointerup', (e)=>{
+    Tap.markGhost(e);   // とじた下の画面に、このあとの同じ指の click を当てない（tap.js の 👻）
     Sound.tap();
     closeRefZoom();
     if(pendingStart){ pendingStart = false; beginGame(); }   // B-1: プレビューを閉じたら本編開始

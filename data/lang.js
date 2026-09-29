@@ -479,3 +479,331 @@ Object.keys(LANG).forEach(k=>{
   LANG[k].ui.daysUnit  = DAYS_U[k]  || '';
   LANG[k].ui.timesUnit = TIMES_U[k] || '';
 });
+
+/* ---- はじめての あそびかた（初回の案内・2026-09-30・15言語） ----
+   ヒロさん「ひとつずつ・そよぎ みたいなタイプのアプリは、必ず最初に使い方の丁寧な説明を出してほしい」。
+   LANG[k].guide = { title, step, prev, next, start, again, heads[8], bodies[8] }（app.js の openGuide が使う）
+   ・かっこ（「」“”«»„“ など）の中の名前は、その言語の画面の文字と同じ（store/_back_check.js が全言語で照らす）
+   ・せっていの行は ui.guideTitle（見出し）と ui.guideAgain（ボタン）＝ title と again と同じ文字 */
+const GUIDE = {
+  ja: { title:"あそびかた", step:"{n} / {m}", prev:"まえ", next:"つぎ", start:"はじめる", again:"あそびかたを もういちど みる",
+    heads:[
+      "脳活ジグソーへ ようこそ",
+      "はじめかた",
+      "絵の えらびかた",
+      "パズルの あそびかた",
+      "こまったときは",
+      "かんせいしたら",
+      "記録",
+      "見やすく・音"
+    ],
+    bodies:[
+      "このアプリは、じぶんの しゃしんや 名画で ジグソーパズルを する アプリです。\nピースを 指で うごかして、1まいの 絵に もどします。\nことばは この 下で えらべます。あとから「せってい」でも かえられます。",
+      "ホームの「はじめる」を おします。\n「初級」（4ピース）・「中級」（9ピース）・「上級」（16ピース）から、むずかしさを えらびます。\nつぎに、パズルに する 絵を えらびます。",
+      "「アルバムから えらぶ」で、スマホの 中の しゃしんを つかいます。\n「カメラで とる」で、その場で とった しゃしんを つかいます。\n「サンプルを つかう」では、名画 36点から えらびます。かんせいした 名画には ✓ が つきます。\nしゃしんは この 端末の 中で パズルに つかうだけで、どこにも 送りません。",
+      "はじめに、できあがりの 絵が 出ます。画面を タップすると スタートです。\nピースを 指で おさえたまま、入れかえたい ところまで うごかして はなすと、2まいが 入れかわります。\n正しい 場所に 入った ピースには ✓ が つきます。ぜんぶ そろうと かんせいです。",
+      "上の 小さな 絵（見本）を おすと、大きく 見られます。どこかを おすと もどります。\n「ヒント」を おすと、ピースが 1まい 正しい 場所に 入ります（「てすう」が 1 ふえます）。\nとちゅうで やめるときは「ホームにもどる」を おします。とちゅうで やめた パズルは 記録に のこりません。",
+      "かんせいすると、かかった「じかん」と「てすう」、⭐ が 出ます。はやく できるほど ⭐ が ふえます（3つまで）。\n名画なら、作品の 名前と 作者も 出ます。\n「もういちど」で 同じ 絵を もう1回、「べつの しゃしんで」で 絵を えらびなおせます。",
+      "ホームに「プレイ日数」と「プレイ回数」が 出ます。\n「記録を見る」の カレンダーでは、あそんだ 日に むずかしさごとの 回数が 色で つきます（オレンジは 初級・青は 中級・緑は 上級）。日にちを おすと、その日の 記録が 見られます。\n記録は この 端末の 中だけに のこり、どこにも 送られません。登録も いりません。",
+      "ホームの 右上の「せってい」で、「ことば」「もじの大きさ」「おと」「おんがく」を かえられます。\nこの 案内は「せってい」の「あそびかたを もういちど みる」で、いつでも 見られます。"
+    ] },
+  en: { title:"How to play", step:"{n} / {m}", prev:"Previous", next:"Next", start:"Start", again:"See how to play again",
+    heads:[
+      "Welcome",
+      "How to start",
+      "Choosing a picture",
+      "How to play the puzzle",
+      "If you get stuck",
+      "When you finish",
+      "Records",
+      "Easier to see, and sound"
+    ],
+    bodies:[
+      "In this app you do jigsaw puzzles with your own photos or with famous paintings.\nMove the pieces with your finger to put the picture back together.\nChoose your language below. You can also change it later in “Settings”.",
+      "Press “Start” on the home screen.\nChoose a difficulty: “Easy” (4 pieces), “Medium” (9 pieces) or “Hard” (16 pieces).\nThen choose the picture for your puzzle.",
+      "“Choose from album” uses a photo on your phone.\n“Take a photo” uses a photo you take right then.\n“Use a sample” lets you choose from 36 famous paintings. Paintings you have completed get a ✓.\nYour photo is only used for the puzzle on this device; it is never sent anywhere.",
+      "First the finished picture is shown. Tap the screen to start.\nHold a piece with your finger, move it to where you want it and let go: the two pieces swap places.\nA piece in the right place gets a ✓. When every piece is in place, the puzzle is complete.",
+      "Press the small picture (the model) at the top to see it large. Press anywhere to go back.\nPress “Hint” and one piece moves to its right place (this adds 1 to your “Moves”).\nTo stop partway, press “Home”. A puzzle you stop partway is not saved in your records.",
+      "When the puzzle is complete, you see your “Time”, your “Moves” and ⭐. The faster you finish, the more ⭐ you get (up to 3).\nFor a famous painting, its title and painter are shown too.\n“Again” plays the same picture once more, and “Different photo” lets you choose another picture.",
+      "The home screen shows “Days played” and “Times played”.\nIn the “See records” calendar, the days you played show counts in a color for each difficulty (orange for Easy, blue for Medium, green for Hard). Press a day to see that day's records.\nYour records stay only on this device and are never sent anywhere. No sign-up is needed.",
+      "With “Settings” at the top right of the home screen you can change “Language”, “Text size”, “Sound” and “Music”.\nYou can see this guide again at any time with “See how to play again” in “Settings”."
+    ] },
+  zh: { title:"玩法说明", step:"{n} / {m}", prev:"上一步", next:"下一步", start:"开始", again:"再看一次玩法说明",
+    heads:[
+      "欢迎",
+      "开始方法",
+      "选图方法",
+      "拼图玩法",
+      "遇到困难时",
+      "完成之后",
+      "记录",
+      "看得清楚·声音"
+    ],
+    bodies:[
+      "这个应用可以用你自己的照片或名画来玩拼图。\n用手指移动拼图块，把画拼回原样。\n请在下面选择语言。以后也可以在“设置”里更改。",
+      "在首页按“开始”。\n从“初级”（4块）、“中级”（9块）、“高级”（16块）中选择难度。\n然后选择要拼的图。",
+      "“从相册选择”：使用手机里的照片。\n“拍照”：使用当场拍的照片。\n“使用示例图片”：从36幅名画中选择。拼好的名画会标上✓。\n照片只在这台设备上用于拼图，不会发送到任何地方。",
+      "开始前会先显示完成后的图。点一下画面就开始。\n用手指按住一块拼图，移到想交换的位置再松开，两块就会交换。\n放对位置的拼图块会标上✓。全部放对就完成了。",
+      "点上方的小图（样图）可以放大查看。点任意位置就会回来。\n按“提示”，会有1块拼图放到正确位置（“步数”加1）。\n想中途停止时，按“回首页”。中途停止的拼图不会留下记录。",
+      "完成后会显示用的“时间”“步数”和⭐。越快完成，⭐越多（最多3颗）。\n如果是名画，还会显示作品名和作者。\n按“再玩一次”再拼同一幅图，按“换一张照片”重新选图。",
+      "首页会显示“游玩天数”和“游玩次数”。\n在“查看记录”的日历上，玩过的日子会按难度用颜色标出次数（橙色是初级，蓝色是中级，绿色是高级）。点日期就能看到当天的记录。\n记录只保存在这台设备里，不会发送到任何地方，也不需要注册。",
+      "在首页右上角的“设置”里，可以更改“语言”“字号”“声音”“音乐”。\n在“设置”里按“再看一次玩法说明”，随时可以再看这份说明。"
+    ] },
+  'zh-TW': { title:"玩法說明", step:"{n} / {m}", prev:"上一步", next:"下一步", start:"開始", again:"再看一次玩法說明",
+    heads:[
+      "歡迎",
+      "開始方法",
+      "選圖方法",
+      "拼圖玩法",
+      "遇到困難時",
+      "完成之後",
+      "紀錄",
+      "看得清楚・聲音"
+    ],
+    bodies:[
+      "這個應用程式可以用你自己的照片或名畫來玩拼圖。\n用手指移動拼圖塊，把畫拼回原樣。\n請在下面選擇語言。之後也可以在「設定」裡更改。",
+      "在首頁按「開始」。\n從「初級」（4塊）、「中級」（9塊）、「高級」（16塊）中選擇難度。\n接著選擇要拼的圖。",
+      "「從相簿選擇」：使用手機裡的照片。\n「拍照」：使用當場拍的照片。\n「使用範例圖片」：從36幅名畫中選擇。拼好的名畫會標上✓。\n照片只在這台裝置上用於拼圖，不會傳送到任何地方。",
+      "開始前會先顯示完成後的圖。點一下畫面就開始。\n用手指按住一塊拼圖，移到想交換的位置再放開，兩塊就會交換。\n放對位置的拼圖塊會標上✓。全部放對就完成了。",
+      "點上方的小圖（範本）可以放大查看。點任何地方就會回來。\n按「提示」，會有1塊拼圖放到正確位置（「步數」加1）。\n想中途停止時，按「回首頁」。中途停止的拼圖不會留下紀錄。",
+      "完成後會顯示花的「時間」「步數」和⭐。越快完成，⭐越多（最多3顆）。\n如果是名畫，還會顯示作品名稱和作者。\n按「再玩一次」再拼同一幅圖，按「換一張照片」重新選圖。",
+      "首頁會顯示「遊玩天數」和「遊玩次數」。\n在「查看紀錄」的月曆上，玩過的日子會依難度用顏色標出次數（橘色是初級，藍色是中級，綠色是高級）。點日期就能看到當天的紀錄。\n紀錄只保存在這台裝置裡，不會傳送到任何地方，也不需要註冊。",
+      "在首頁右上角的「設定」裡，可以更改「語言」「字級」「聲音」「音樂」。\n在「設定」裡按「再看一次玩法說明」，隨時可以再看這份說明。"
+    ] },
+  ko: { title:"하는 방법", step:"{n} / {m}", prev:"이전", next:"다음", start:"시작하기", again:"하는 방법 다시 보기",
+    heads:[
+      "환영합니다",
+      "시작하는 방법",
+      "그림 고르기",
+      "퍼즐 하는 방법",
+      "막혔을 때는",
+      "완성하면",
+      "기록",
+      "보기 쉽게 · 소리"
+    ],
+    bodies:[
+      "이 앱은 내 사진이나 명화로 직소 퍼즐을 하는 앱입니다.\n손가락으로 조각을 옮겨서 그림을 원래대로 맞춥니다.\n아래에서 언어를 고르세요. 나중에 “설정”에서도 바꿀 수 있습니다.",
+      "홈에서 “시작”을 누르세요.\n“초급”(4조각), “중급”(9조각), “고급”(16조각) 중에서 난이도를 고릅니다.\n그다음 퍼즐로 만들 그림을 고릅니다.",
+      "“앨범에서 선택”은 휴대폰에 있는 사진을 씁니다.\n“사진 촬영”은 그 자리에서 찍은 사진을 씁니다.\n“샘플 사용”에서는 명화 36점 중에서 고릅니다. 완성한 명화에는 ✓가 붙습니다.\n사진은 이 기기 안에서 퍼즐에만 쓰이고, 어디로도 보내지 않습니다.",
+      "먼저 완성된 그림이 나옵니다. 화면을 탭하면 시작합니다.\n조각을 손가락으로 누른 채 바꾸고 싶은 곳까지 옮겨서 떼면 두 조각이 서로 바뀝니다.\n제자리에 들어간 조각에는 ✓가 붙습니다. 모두 맞추면 완성입니다.",
+      "위의 작은 그림(견본)을 누르면 크게 볼 수 있습니다. 아무 곳이나 누르면 돌아옵니다.\n“힌트”를 누르면 조각 1개가 제자리에 들어갑니다(“이동 횟수”가 1 늘어납니다).\n중간에 그만하려면 “홈으로”를 누르세요. 중간에 그만둔 퍼즐은 기록에 남지 않습니다.",
+      "완성하면 걸린 “시간”과 “이동 횟수”, ⭐이 나옵니다. 빨리 맞출수록 ⭐이 늘어납니다(최대 3개).\n명화라면 작품 이름과 화가도 나옵니다.\n“다시 하기”를 누르면 같은 그림을 한 번 더 하고, “다른 사진으로”를 누르면 그림을 다시 고를 수 있습니다.",
+      "홈에 “플레이 일수”와 “플레이 횟수”가 나옵니다.\n“기록 보기”의 달력에서는 플레이한 날에 난이도별 횟수가 색으로 표시됩니다(주황은 초급, 파랑은 중급, 초록은 고급). 날짜를 누르면 그날의 기록을 볼 수 있습니다.\n기록은 이 기기 안에만 남고 어디에도 보내지지 않습니다. 가입도 필요 없습니다.",
+      "홈 오른쪽 위의 “설정”에서 “언어”, “글자 크기”, “소리”, “음악”을 바꿀 수 있습니다.\n이 안내는 “설정”의 “하는 방법 다시 보기”로 언제든지 다시 볼 수 있습니다."
+    ] },
+  es: { title:"Cómo se juega", step:"{n} / {m}", prev:"Anterior", next:"Siguiente", start:"Empezar", again:"Ver otra vez cómo se juega",
+    heads:[
+      "Te damos la bienvenida",
+      "Cómo empezar",
+      "Cómo elegir la imagen",
+      "Cómo se arma el rompecabezas",
+      "Si te atascas",
+      "Al terminar",
+      "Registros",
+      "Ver mejor y sonido"
+    ],
+    bodies:[
+      "Con esta app haces rompecabezas con tus propias fotos o con cuadros famosos.\nMueve las piezas con el dedo hasta recomponer la imagen.\nElige tu idioma aquí abajo. También puedes cambiarlo después en «Ajustes».",
+      "En la pantalla de inicio, pulsa «Empezar».\nElige la dificultad: «Fácil» (4 piezas), «Medio» (9 piezas) o «Difícil» (16 piezas).\nLuego elige la imagen del rompecabezas.",
+      "«Elegir del álbum» usa una foto de tu teléfono.\n«Tomar una foto» usa una foto que haces en ese momento.\nCon «Usar una muestra» eliges entre 36 cuadros famosos. Los cuadros que completas llevan un ✓.\nTu foto solo se usa para el rompecabezas en este dispositivo y no se envía a ningún sitio.",
+      "Primero se muestra la imagen terminada. Toca la pantalla para empezar.\nMantén el dedo sobre una pieza, llévala adonde quieras y suéltala: las dos piezas se intercambian.\nUna pieza en su sitio lleva un ✓. Cuando todas están en su sitio, el rompecabezas está completo.",
+      "Pulsa la imagen pequeña (el modelo) de arriba para verla en grande. Pulsa en cualquier sitio para volver.\nPulsa «Pista» y una pieza irá a su sitio (suma 1 a los «Movimientos»).\nPara dejarlo a mitad, pulsa «Inicio». Un rompecabezas que dejas a mitad no se guarda en los registros.",
+      "Al completarlo verás el «Tiempo», los «Movimientos» y ⭐. Cuanto más rápido, más ⭐ (hasta 3).\nSi es un cuadro famoso, también verás su título y su autor.\n«Otra vez» repite la misma imagen y «Otra foto» te deja elegir otra.",
+      "La pantalla de inicio muestra «Días jugados» y «Veces jugadas».\nEn el calendario de «Ver registros», los días en que jugaste muestran las veces con un color por dificultad (naranja: Fácil, azul: Medio, verde: Difícil). Pulsa un día para ver sus registros.\nTus registros se quedan solo en este dispositivo y no se envían a ningún sitio. No hace falta registrarse.",
+      "En «Ajustes», arriba a la derecha de la pantalla de inicio, puedes cambiar «Idioma», «Tamaño del texto», «Sonido» y «Música».\nPuedes volver a ver esta guía cuando quieras con «Ver otra vez cómo se juega» en «Ajustes»."
+    ] },
+  pt: { title:"Como jogar", step:"{n} / {m}", prev:"Anterior", next:"Próximo", start:"Começar", again:"Ver de novo como jogar",
+    heads:[
+      "Boas-vindas",
+      "Como começar",
+      "Como escolher a imagem",
+      "Como montar",
+      "Se ficar difícil",
+      "Ao terminar",
+      "Registros",
+      "Ver melhor e som"
+    ],
+    bodies:[
+      "Neste app você monta quebra-cabeças com suas próprias fotos ou com pinturas famosas.\nMova as peças com o dedo para remontar a imagem.\nEscolha o idioma aqui embaixo. Você também pode mudá-lo depois em “Ajustes”.",
+      "Na tela inicial, toque em “Começar”.\nEscolha a dificuldade: “Fácil” (4 peças), “Médio” (9 peças) ou “Difícil” (16 peças).\nDepois escolha a imagem do quebra-cabeça.",
+      "“Escolher do álbum” usa uma foto do seu celular.\n“Tirar uma foto” usa uma foto tirada na hora.\nEm “Usar uma amostra” você escolhe entre 36 pinturas famosas. As pinturas que você completou ganham um ✓.\nSua foto só é usada no quebra-cabeça, neste aparelho, e não é enviada a lugar nenhum.",
+      "Primeiro aparece a imagem pronta. Toque na tela para começar.\nSegure uma peça com o dedo, leve-a até onde quer e solte: as duas peças trocam de lugar.\nUma peça no lugar certo ganha um ✓. Quando todas estiverem no lugar, o quebra-cabeça está completo.",
+      "Toque na imagem pequena (o modelo) no alto para vê-la grande. Toque em qualquer lugar para voltar.\nToque em “Dica” e uma peça vai para o lugar certo (soma 1 aos “Movimentos”).\nPara parar no meio, toque em “Início”. Um quebra-cabeça interrompido não fica nos registros.",
+      "Ao completar, aparecem o “Tempo”, os “Movimentos” e ⭐. Quanto mais rápido, mais ⭐ (até 3).\nSe for uma pintura famosa, aparecem também o título e o autor.\n“De novo” repete a mesma imagem e “Outra foto” deixa você escolher outra.",
+      "A tela inicial mostra “Dias jogados” e “Vezes jogadas”.\nNo calendário de “Ver registros”, os dias em que você jogou mostram as vezes com uma cor para cada dificuldade (laranja: Fácil, azul: Médio, verde: Difícil). Toque num dia para ver os registros dele.\nSeus registros ficam só neste aparelho e não são enviados a lugar nenhum. Não é preciso cadastro.",
+      "Em “Ajustes”, no canto superior direito da tela inicial, você pode mudar “Idioma”, “Tamanho do texto”, “Som” e “Música”.\nVocê pode ver este guia de novo quando quiser em “Ver de novo como jogar”, dentro de “Ajustes”."
+    ] },
+  fr: { title:"Comment jouer", step:"{n} / {m}", prev:"Précédent", next:"Suivant", start:"Commencer", again:"Revoir comment jouer",
+    heads:[
+      "Bienvenue",
+      "Pour commencer",
+      "Choisir l'image",
+      "Comment faire le puzzle",
+      "En cas de difficulté",
+      "Une fois terminé",
+      "Historique",
+      "Lisibilité et son"
+    ],
+    bodies:[
+      "Avec cette application, vous faites des puzzles avec vos propres photos ou avec des tableaux célèbres.\nDéplacez les pièces avec le doigt pour reconstituer l'image.\nChoisissez votre langue ci-dessous. Vous pourrez aussi la changer plus tard dans « Réglages ».",
+      "Sur l'écran d'accueil, touchez « Commencer ».\nChoisissez la difficulté : « Facile » (4 pièces), « Moyen » (9 pièces) ou « Difficile » (16 pièces).\nChoisissez ensuite l'image du puzzle.",
+      "« Choisir dans l'album » utilise une photo de votre téléphone.\n« Prendre une photo » utilise une photo prise sur le moment.\n« Utiliser un exemple » permet de choisir parmi 36 tableaux célèbres. Les tableaux terminés portent un ✓.\nVotre photo sert seulement au puzzle, sur cet appareil, et n'est envoyée nulle part.",
+      "D'abord, l'image terminée s'affiche. Touchez l'écran pour commencer.\nGardez le doigt sur une pièce, amenez-la où vous voulez et relâchez : les deux pièces échangent leur place.\nUne pièce bien placée porte un ✓. Quand toutes sont en place, le puzzle est terminé.",
+      "Touchez la petite image (le modèle) en haut pour l'agrandir. Touchez n'importe où pour revenir.\nTouchez « Indice » et une pièce se met à sa place (cela ajoute 1 aux « Coups »).\nPour arrêter en cours de route, touchez « Accueil ». Un puzzle arrêté en cours de route n'est pas enregistré dans l'historique.",
+      "Quand le puzzle est terminé, s'affichent le « Temps », les « Coups » et ⭐. Plus vous êtes rapide, plus vous avez de ⭐ (jusqu'à 3).\nPour un tableau célèbre, son titre et son auteur s'affichent aussi.\n« Encore » refait la même image et « Autre photo » permet d'en choisir une autre.",
+      "L'écran d'accueil montre « Jours joués » et « Parties jouées ».\nDans le calendrier de « Voir l'historique », les jours où vous avez joué indiquent le nombre de parties avec une couleur par difficulté (orange : Facile, bleu : Moyen, vert : Difficile). Touchez un jour pour voir son historique.\nVotre historique reste uniquement sur cet appareil et n'est envoyé nulle part. Aucune inscription n'est nécessaire.",
+      "Dans « Réglages », en haut à droite de l'accueil, vous pouvez changer « Langue », « Taille du texte », « Son » et « Musique ».\nVous pouvez revoir ce guide à tout moment avec « Revoir comment jouer » dans « Réglages »."
+    ] },
+  de: { title:"So wird gespielt", step:"{n} / {m}", prev:"Vorherige", next:"Weiter", start:"Loslegen", again:"Spielanleitung noch einmal ansehen",
+    heads:[
+      "Willkommen",
+      "So fangen Sie an",
+      "Ein Bild wählen",
+      "So legen Sie das Puzzle",
+      "Wenn Sie nicht weiterkommen",
+      "Wenn Sie fertig sind",
+      "Verlauf",
+      "Besser lesen und Ton"
+    ],
+    bodies:[
+      "Mit dieser App legen Sie Puzzles aus Ihren eigenen Fotos oder aus berühmten Gemälden.\nSchieben Sie die Teile mit dem Finger, bis das Bild wieder ganz ist.\nWählen Sie unten Ihre Sprache. Sie können sie später auch unter „Einstellungen“ ändern.",
+      "Tippen Sie auf dem Startbildschirm auf „Start“.\nWählen Sie die Schwierigkeit: „Leicht“ (4 Teile), „Mittel“ (9 Teile) oder „Schwer“ (16 Teile).\nWählen Sie dann das Bild für Ihr Puzzle.",
+      "„Aus Album wählen“ nimmt ein Foto aus Ihrem Handy.\n„Foto aufnehmen“ nimmt ein Foto, das Sie gerade machen.\nBei „Beispiel verwenden“ wählen Sie aus 36 berühmten Gemälden. Fertige Gemälde bekommen ein ✓.\nIhr Foto wird nur auf diesem Gerät für das Puzzle benutzt und nirgendwohin gesendet.",
+      "Zuerst sehen Sie das fertige Bild. Tippen Sie auf den Bildschirm, um zu beginnen.\nHalten Sie ein Teil mit dem Finger fest, ziehen Sie es an die gewünschte Stelle und lassen Sie los: Die beiden Teile tauschen die Plätze.\nEin Teil am richtigen Platz bekommt ein ✓. Wenn alle Teile richtig liegen, ist das Puzzle fertig.",
+      "Tippen Sie oben auf das kleine Bild (die Vorlage), um es groß zu sehen. Tippen Sie irgendwohin, um zurückzukehren.\nTippen Sie auf „Tipp“, dann kommt ein Teil an seinen Platz (die „Züge“ erhöhen sich um 1).\nUm vorzeitig aufzuhören, tippen Sie unten auf „Start“. Ein vorzeitig beendetes Puzzle wird nicht gespeichert.",
+      "Wenn das Puzzle fertig ist, sehen Sie „Zeit“, „Züge“ und ⭐. Je schneller Sie sind, desto mehr ⭐ gibt es (bis zu 3).\nBei einem berühmten Gemälde sehen Sie auch den Titel und den Maler.\n„Nochmal“ legt dasselbe Bild noch einmal, und mit „Anderes Foto“ wählen Sie ein anderes Bild.",
+      "Der Startbildschirm zeigt „Gespielte Tage“ und „Gespielte Runden“.\nIm Kalender unter „Verlauf ansehen“ zeigen die Tage, an denen Sie gespielt haben, die Anzahl in einer Farbe je Schwierigkeit (Orange: Leicht, Blau: Mittel, Grün: Schwer). Tippen Sie auf einen Tag, um den Verlauf zu sehen.\nIhr Verlauf bleibt nur auf diesem Gerät und wird nirgendwohin gesendet. Eine Anmeldung ist nicht nötig.",
+      "Unter „Einstellungen“ oben rechts auf dem Startbildschirm können Sie „Sprache“, „Textgröße“, „Ton“ und „Musik“ ändern.\nDiese Anleitung öffnen Sie jederzeit wieder mit „Spielanleitung noch einmal ansehen“ unter „Einstellungen“."
+    ] },
+  it: { title:"Come si gioca", step:"{n} / {m}", prev:"Indietro", next:"Avanti", start:"Inizia", again:"Rivedi come si gioca",
+    heads:[
+      "Benvenuti",
+      "Come iniziare",
+      "Scegliere l'immagine",
+      "Come si fa il puzzle",
+      "Se ti blocchi",
+      "Alla fine",
+      "Archivio",
+      "Leggere meglio e suoni"
+    ],
+    bodies:[
+      "Con questa app fai puzzle con le tue foto o con dipinti famosi.\nSposta i pezzi con il dito per ricomporre l'immagine.\nScegli la lingua qui sotto. Potrai cambiarla anche dopo in «Impostazioni».",
+      "Nella schermata iniziale tocca «Inizia».\nScegli la difficoltà: «Facile» (4 pezzi), «Medio» (9 pezzi) o «Difficile» (16 pezzi).\nPoi scegli l'immagine del puzzle.",
+      "«Scegli dall'album» usa una foto del tuo telefono.\n«Scatta una foto» usa una foto scattata al momento.\nCon «Usa un esempio» scegli tra 36 dipinti famosi. I dipinti completati hanno un ✓.\nLa tua foto serve solo per il puzzle su questo dispositivo e non viene inviata da nessuna parte.",
+      "Prima compare l'immagine finita. Tocca lo schermo per iniziare.\nTieni il dito su un pezzo, portalo dove vuoi e lascialo: i due pezzi si scambiano di posto.\nUn pezzo al posto giusto ha un ✓. Quando tutti i pezzi sono a posto, il puzzle è completo.",
+      "Tocca l'immagine piccola (il modello) in alto per vederla grande. Tocca un punto qualsiasi per tornare.\nTocca «Suggerimento» e un pezzo va al suo posto (le «Mosse» aumentano di 1).\nPer smettere a metà, tocca «Home». Un puzzle interrotto a metà non viene salvato nell'archivio.",
+      "Quando il puzzle è completo vedi il «Tempo», le «Mosse» e ⭐. Più sei veloce, più ⭐ ottieni (fino a 3).\nSe è un dipinto famoso, vedi anche il titolo e l'autore.\n«Di nuovo» rifà la stessa immagine e «Altra foto» ti fa scegliere un'altra immagine.",
+      "La schermata iniziale mostra «Giorni giocati» e «Volte giocate».\nNel calendario di «Vedi archivio», i giorni in cui hai giocato mostrano le volte con un colore per difficoltà (arancione: Facile, blu: Medio, verde: Difficile). Tocca un giorno per vederne l'archivio.\nL'archivio resta solo su questo dispositivo e non viene inviato da nessuna parte. Non serve registrarsi.",
+      "In «Impostazioni», in alto a destra nella schermata iniziale, puoi cambiare «Lingua», «Dimensione testo», «Suono» e «Musica».\nPuoi rivedere questa guida quando vuoi con «Rivedi come si gioca» in «Impostazioni»."
+    ] },
+  nl: { title:"Zo speel je", step:"{n} / {m}", prev:"Vorige", next:"Volgende", start:"Beginnen", again:"Nog eens bekijken hoe je speelt",
+    heads:[
+      "Welkom",
+      "Zo begin je",
+      "Een plaatje kiezen",
+      "Zo puzzel je",
+      "Kom je er niet uit?",
+      "Als je klaar bent",
+      "Records",
+      "Beter lezen en geluid"
+    ],
+    bodies:[
+      "Met deze app maak je puzzels van je eigen foto's of van beroemde schilderijen.\nSchuif de stukjes met je vinger tot het plaatje weer heel is.\nKies hieronder je taal. Je kunt die later ook wijzigen bij “Instellingen”.",
+      "Tik op het beginscherm op “Start”.\nKies de moeilijkheid: “Makkelijk” (4 stukjes), “Gemiddeld” (9 stukjes) of “Moeilijk” (16 stukjes).\nKies daarna het plaatje voor je puzzel.",
+      "“Kiezen uit album” gebruikt een foto van je telefoon.\n“Foto maken” gebruikt een foto die je op dat moment maakt.\nBij “Voorbeeld gebruiken” kies je uit 36 beroemde schilderijen. Schilderijen die je af hebt, krijgen een ✓.\nJe foto wordt alleen op dit apparaat voor de puzzel gebruikt en nergens naartoe gestuurd.",
+      "Eerst zie je het afgemaakte plaatje. Tik op het scherm om te beginnen.\nHoud een stukje vast met je vinger, schuif het naar de plek die je wilt en laat los: de twee stukjes ruilen van plaats.\nEen stukje op de goede plek krijgt een ✓. Als alle stukjes goed liggen, is de puzzel klaar.",
+      "Tik bovenaan op het kleine plaatje (het voorbeeld) om het groot te zien. Tik ergens om terug te gaan.\nTik op “Hint” en er gaat één stukje naar de goede plek (je “Zetten” gaan 1 omhoog).\nWil je halverwege stoppen, tik dan op “Home”. Een puzzel die je halverwege stopt, wordt niet bewaard.",
+      "Als de puzzel klaar is, zie je je “Tijd”, je “Zetten” en ⭐. Hoe sneller, hoe meer ⭐ (tot 3).\nBij een beroemd schilderij zie je ook de titel en de schilder.\nMet “Nog een keer” doe je hetzelfde plaatje nog eens, en met “Andere foto” kies je een ander plaatje.",
+      "Het beginscherm toont “Gespeelde dagen” en “Keer gespeeld”.\nIn de kalender van “Records bekijken” tonen de dagen waarop je speelde het aantal keer in een kleur per moeilijkheid (oranje: Makkelijk, blauw: Gemiddeld, groen: Moeilijk). Tik op een dag om de records van die dag te zien.\nJe records blijven alleen op dit apparaat en worden nergens naartoe gestuurd. Aanmelden is niet nodig.",
+      "Bij “Instellingen” rechtsboven op het beginscherm kun je “Taal”, “Tekstgrootte”, “Geluid” en “Muziek” wijzigen.\nDeze uitleg kun je altijd opnieuw bekijken met “Nog eens bekijken hoe je speelt” bij “Instellingen”."
+    ] },
+  pl: { title:"Jak grać", step:"{n} / {m}", prev:"Poprzednia", next:"Dalej", start:"Zacznij", again:"Zobacz ponownie, jak grać",
+    heads:[
+      "Witamy",
+      "Jak zacząć",
+      "Wybór obrazu",
+      "Jak układać",
+      "Gdy utkniesz",
+      "Po ułożeniu",
+      "Zapisy",
+      "Czytelność i dźwięk"
+    ],
+    bodies:[
+      "W tej aplikacji układasz puzzle z własnych zdjęć lub ze słynnych obrazów.\nPrzesuwaj elementy palcem, aż obraz znów będzie cały.\nWybierz język poniżej. Możesz go też zmienić później przyciskiem „Ustawienia”.",
+      "Na ekranie głównym naciśnij „Start”.\nWybierz poziom trudności: „Łatwy” (4 elementy), „Średni” (9 elementów) lub „Trudny” (16 elementów).\nNastępnie wybierz obraz do puzzli.",
+      "„Wybierz z albumu” używa zdjęcia z telefonu.\n„Zrób zdjęcie” używa zdjęcia zrobionego od razu.\nPrzycisk „Użyj przykładu” pozwala wybrać spośród 36 słynnych obrazów. Ukończone obrazy mają ✓.\nTwoje zdjęcie służy tylko do puzzli na tym urządzeniu i nie jest nigdzie wysyłane.",
+      "Najpierw pokazuje się gotowy obraz. Dotknij ekranu, aby zacząć.\nPrzytrzymaj element palcem, przesuń go w wybrane miejsce i puść: dwa elementy zamienią się miejscami.\nElement na właściwym miejscu ma ✓. Gdy wszystkie są na miejscu, puzzle są ułożone.",
+      "Naciśnij mały obrazek (wzór) na górze, aby zobaczyć go w dużym rozmiarze. Naciśnij w dowolnym miejscu, aby wrócić.\nNaciśnij „Podpowiedź”, a jeden element trafi na swoje miejsce („Ruchy” wzrosną o 1).\nAby przerwać, naciśnij „Start” na dole. Przerwane puzzle nie są zapisywane.",
+      "Po ułożeniu zobaczysz „Czas”, „Ruchy” i ⭐. Im szybciej, tym więcej ⭐ (do 3).\nPrzy słynnym obrazie zobaczysz też tytuł i autora.\n„Jeszcze raz” układa ten sam obraz jeszcze raz, a „Inne zdjęcie” pozwala wybrać inny obraz.",
+      "Ekran główny pokazuje „Dni gry” i „Rozegrane gry”.\nW kalendarzu pod przyciskiem „Zobacz zapisy” dni z grą pokazują liczbę gier w kolorze każdego poziomu (pomarańczowy: Łatwy, niebieski: Średni, zielony: Trudny). Naciśnij dzień, aby zobaczyć jego zapisy.\nZapisy zostają tylko na tym urządzeniu i nie są nigdzie wysyłane. Rejestracja nie jest potrzebna.",
+      "Przyciskiem „Ustawienia” w prawym górnym rogu ekranu głównego możesz zmienić „Język”, „Rozmiar tekstu”, „Dźwięk” i „Muzyka”.\nTen przewodnik możesz zobaczyć ponownie w każdej chwili: naciśnij „Ustawienia”, a potem „Zobacz ponownie, jak grać”."
+    ] },
+  ru: { title:"Как играть", step:"{n} / {m}", prev:"Назад", next:"Далее", start:"Начать", again:"Снова посмотреть, как играть",
+    heads:[
+      "Добро пожаловать",
+      "Как начать",
+      "Выбор картинки",
+      "Как собирать",
+      "Если не получается",
+      "Когда пазл собран",
+      "Записи",
+      "Удобство и звук"
+    ],
+    bodies:[
+      "В этом приложении вы собираете пазлы из своих фотографий или из знаменитых картин.\nПередвигайте детали пальцем, пока картинка снова не станет целой.\nВыберите язык ниже. Потом его можно сменить в разделе «Настройки».",
+      "На главном экране нажмите «Начать».\nВыберите сложность: «Лёгкий» (4 детали), «Средний» (9 деталей) или «Сложный» (16 деталей).\nЗатем выберите картинку для пазла.",
+      "«Выбрать из альбома» берёт фото из вашего телефона.\n«Сделать фото» берёт фото, снятое прямо сейчас.\nВ разделе «Использовать образец» можно выбрать одну из 36 знаменитых картин. Собранные картины отмечаются ✓.\nВаше фото используется только для пазла на этом устройстве и никуда не отправляется.",
+      "Сначала показывается готовая картинка. Коснитесь экрана, чтобы начать.\nПрижмите деталь пальцем, перетащите её туда, куда нужно, и отпустите: две детали поменяются местами.\nДеталь на своём месте отмечается ✓. Когда все детали на месте, пазл собран.",
+      "Нажмите маленькую картинку (образец) вверху, чтобы увидеть её крупно. Нажмите в любом месте, чтобы вернуться.\nНажмите «Подсказка», и одна деталь встанет на своё место («Ходы» увеличатся на 1).\nЧтобы закончить посередине, нажмите «Домой». Незаконченный пазл не сохраняется в записях.",
+      "Когда пазл собран, вы увидите «Время», «Ходы» и ⭐. Чем быстрее, тем больше ⭐ (до 3).\nДля знаменитой картины показываются также её название и автор.\n«Ещё раз» повторяет ту же картинку, а «Другое фото» позволяет выбрать другую.",
+      "На главном экране видны «Дней игры» и «Всего игр».\nВ календаре раздела «Посмотреть записи» у дней, когда вы играли, число игр показано цветом по сложности (оранжевый: Лёгкий, синий: Средний, зелёный: Сложный). Нажмите на день, чтобы увидеть его записи.\nЗаписи хранятся только на этом устройстве и никуда не отправляются. Регистрация не нужна.",
+      "В разделе «Настройки» справа вверху на главном экране можно изменить «Язык», «Размер текста», «Звук» и «Музыка».\nЭто руководство можно снова открыть в любое время кнопкой «Снова посмотреть, как играть» в разделе «Настройки»."
+    ] },
+  tr: { title:"Nasıl oynanır", step:"{n} / {m}", prev:"Geri", next:"İleri", start:"Başla", again:"Nasıl oynanır, tekrar bak",
+    heads:[
+      "Hoş geldiniz",
+      "Nasıl başlanır",
+      "Resim seçme",
+      "Yapboz nasıl yapılır",
+      "Takılırsanız",
+      "Bitirince",
+      "Kayıtlar",
+      "Kolay okuma ve ses"
+    ],
+    bodies:[
+      "Bu uygulamada kendi fotoğraflarınızla ya da ünlü tablolarla yapboz yaparsınız.\nParçaları parmağınızla kaydırarak resmi yeniden tamamlarsınız.\nDili aşağıdan seçin. Daha sonra “Ayarlar” bölümünden de değiştirebilirsiniz.",
+      "Ana sayfada “Başla” düğmesine basın.\nZorluğu seçin: “Kolay” (4 parça), “Orta” (9 parça) ya da “Zor” (16 parça).\nSonra yapboz için bir resim seçin.",
+      "“Albümden seç” telefonunuzdaki bir fotoğrafı kullanır.\n“Fotoğraf çek” o anda çektiğiniz fotoğrafı kullanır.\n“Örnek kullan” ile 36 ünlü tablodan birini seçersiniz. Tamamladığınız tablolarda ✓ işareti olur.\nFotoğrafınız yalnızca bu cihazda yapboz için kullanılır ve hiçbir yere gönderilmez.",
+      "Önce resmin bitmiş hali görünür. Başlamak için ekrana dokunun.\nBir parçayı parmağınızla basılı tutun, istediğiniz yere götürüp bırakın: iki parça yer değiştirir.\nDoğru yerdeki parçada ✓ işareti olur. Bütün parçalar yerine oturunca yapboz tamamlanır.",
+      "Büyük görmek için üstteki küçük resme (örnek resim) dokunun. Geri dönmek için herhangi bir yere dokunun.\n“İpucu” düğmesine basınca bir parça doğru yerine gider (“Hamle” 1 artar).\nYarıda bırakmak için “Ana sayfa” düğmesine basın. Yarıda bırakılan yapboz kayıtlara geçmez.",
+      "Yapboz tamamlanınca “Süre”, “Hamle” ve ⭐ görünür. Ne kadar hızlı biterseniz o kadar çok ⭐ alırsınız (en çok 3).\nÜnlü bir tabloysa adı ve ressamı da görünür.\n“Tekrar” aynı resmi bir daha yaptırır, “Başka fotoğraf” ile başka bir resim seçersiniz.",
+      "Ana sayfada “Oynanan gün” ve “Oynama sayısı” görünür.\n“Kayıtları gör” takviminde oynadığınız günlerde her zorluk için ayrı renkte sayı görünür (turuncu: Kolay, mavi: Orta, yeşil: Zor). O günün kayıtlarını görmek için bir güne basın.\nKayıtlar yalnızca bu cihazda kalır ve hiçbir yere gönderilmez. Üyelik gerekmez.",
+      "Ana sayfanın sağ üstündeki “Ayarlar” bölümünden “Dil”, “Yazı boyutu”, “Ses” ve “Müzik” ayarlarını değiştirebilirsiniz.\nBu rehberi “Ayarlar” bölümündeki “Nasıl oynanır, tekrar bak” düğmesiyle istediğiniz zaman yeniden görebilirsiniz."
+    ] },
+  hi: { title:"कैसे खेलें", step:"{n} / {m}", prev:"पिछला", next:"आगे", start:"शुरू करें", again:"कैसे खेलें, फिर से देखें",
+    heads:[
+      "स्वागत है",
+      "कैसे शुरू करें",
+      "चित्र कैसे चुनें",
+      "पहेली कैसे खेलें",
+      "अटक जाएँ तो",
+      "पूरा होने पर",
+      "रिकॉर्ड",
+      "साफ़ दिखना और आवाज़"
+    ],
+    bodies:[
+      "इस ऐप में आप अपनी फ़ोटो या मशहूर चित्रों से जिग्सॉ पहेली बनाते हैं।\nउंगली से टुकड़े खिसकाकर चित्र को फिर से पूरा करें।\nनीचे अपनी भाषा चुनें। बाद में “सेटिंग्स” में भी बदल सकते हैं।",
+      "होम स्क्रीन पर “शुरू करें” दबाएँ।\nकठिनाई चुनें: “आसान” (4 टुकड़े), “मध्यम” (9 टुकड़े) या “कठिन” (16 टुकड़े)।\nफिर पहेली के लिए चित्र चुनें।",
+      "“एल्बम से चुनें” से फ़ोन में रखी फ़ोटो इस्तेमाल होती है।\n“फ़ोटो लें” से उसी समय खींची गई फ़ोटो इस्तेमाल होती है।\n“नमूना उपयोग करें” में 36 मशहूर चित्रों में से चुनें। पूरे किए गए चित्रों पर ✓ लगता है।\nआपकी फ़ोटो सिर्फ़ इसी डिवाइस पर पहेली के लिए इस्तेमाल होती है और कहीं नहीं भेजी जाती।",
+      "पहले पूरा बना चित्र दिखता है। शुरू करने के लिए स्क्रीन छुएँ।\nकिसी टुकड़े को उंगली से दबाए रखें, जहाँ चाहें वहाँ ले जाकर छोड़ दें: दोनों टुकड़े जगह बदल लेते हैं।\nसही जगह पर लगे टुकड़े पर ✓ लगता है। सारे टुकड़े सही जगह पर हों तो पहेली पूरी हो जाती है।",
+      "ऊपर वाले छोटे चित्र (नमूना) को दबाएँ तो वह बड़ा दिखता है। कहीं भी दबाने पर वापस आ जाता है।\n“संकेत” दबाने पर एक टुकड़ा अपनी सही जगह पर चला जाता है (“चालें” 1 बढ़ जाती हैं)।\nबीच में रोकना हो तो “होम” दबाएँ। बीच में रोकी गई पहेली रिकॉर्ड में नहीं जुड़ती।",
+      "पहेली पूरी होने पर “समय”, “चालें” और ⭐ दिखते हैं। जितनी जल्दी पूरी करें, उतने ज़्यादा ⭐ (3 तक)।\nमशहूर चित्र हो तो उसका नाम और चित्रकार भी दिखता है।\n“फिर से” से वही चित्र दोबारा बनाएँ, और “दूसरी फ़ोटो” से कोई और चित्र चुनें।",
+      "होम स्क्रीन पर “खेले दिन” और “खेले बार” दिखते हैं।\n“रिकॉर्ड देखें” के कैलेंडर में जिन दिनों खेला हो, वहाँ हर कठिनाई की गिनती अलग रंग में दिखती है (नारंगी: आसान, नीला: मध्यम, हरा: कठिन)। उस दिन के रिकॉर्ड देखने के लिए दिन दबाएँ।\nरिकॉर्ड सिर्फ़ इसी डिवाइस में रहते हैं और कहीं नहीं भेजे जाते। रजिस्ट्रेशन की ज़रूरत नहीं।",
+      "होम स्क्रीन के ऊपर दाईं ओर “सेटिंग्स” में “भाषा”, “अक्षर का आकार”, “ध्वनि” और “संगीत” बदल सकते हैं।\nयह गाइड कभी भी “सेटिंग्स” में “कैसे खेलें, फिर से देखें” से दोबारा देख सकते हैं।"
+    ] },
+};
+Object.keys(LANG).forEach(k=>{
+  LANG[k].guide = GUIDE[k];
+  LANG[k].ui.guideTitle = GUIDE[k].title;   // せっていの見出し
+  LANG[k].ui.guideAgain = GUIDE[k].again;   // せっていのボタン
+});

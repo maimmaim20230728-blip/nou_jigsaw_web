@@ -26,6 +26,7 @@ function applyI18n(){
 
 /* ===== 画面切り替え ===== */
 function show(id){
+  cancelPick();   // 写真の準備中に画面が変わったら、その準備の続きは捨てる（下の pickFile）
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
@@ -78,20 +79,74 @@ function fileToSquare(file){
   return fileToSquareImg(file);
 }
 
+/* 写真の準備の番号（2026-09-30）: 準備のあいだに「ホームにもどる」や戻るボタンで画面が変わると（show）、
+   あとから準備ができても完成図もパズルも出さない（前は ホームの上に完成図が出て、さわるとパズルが始まっていた）。
+   次の写真を えらんだときも、前の準備の続きは捨てる */
+let pickTicket = 0;
+function cancelPick(){
+  pickTicket++;
+  const ld = document.getElementById('srcLoading');
+  if(ld && ld.textContent === t('preparingPhoto')) ld.textContent = '';   // 「じゅんび ちゅう」は消す（まちがいの文は今までどおり残す）
+}
+
 async function pickFile(input){
   const file = input.files && input.files[0];
   input.value = '';                       // 同じファイルの再選択も拾えるように
   if(!file) return;
+  const my = ++pickTicket;
+  const since = Date.now();               // この準備が始まった時刻（これより前にできたカメラの写真だけを消す・下）
   const loading = document.getElementById('srcLoading');
   loading.textContent = t('preparingPhoto');
-  try{
-    curImg = await fileToSquare(file);
-    loading.textContent = '';
-    startPuzzle();
-  }catch(e){
+  let img = null;
+  try{ img = await fileToSquare(file); }catch(e){ img = null; }
+  clearCameraFiles(since);                // 絵柄(dataURL)ができたあとで、カメラの写真を消す（Play版だけ・下）
+  if(my !== pickTicket) return;           // 準備のあいだに画面が変わった＝捨てる
+  if(!img){
     loading.textContent = t('photoError');   // 次のファイル選択開始時に上書きされる
     Sound.ng();
+    return;
   }
+  curImg = img;
+  loading.textContent = '';
+  startPuzzle();
+}
+
+/* ===== カメラの写真を消す（Play版だけ・2026-09-30） =====
+   Play版で「カメラで とる」と、Capacitor がアプリ専用の場所（Android/data/<パッケージ>/files/Pictures）に
+   JPEG_<日時>_<数字>.jpg を作り、そのまま残していた（撮るのをやめたときの空のファイルも）。
+   HP のプライバシーポリシー「パズルを終えると画像はアプリ内に残りません」のとおりにするため、
+   写真を絵柄（dataURL）にしたあと（上の pickFile）と、起動したとき（前の版の残り）に消す。
+   ・消すのは Capacitor が撮った写真に付ける名前（JPEG_….jpg）だけ。アルバムの写真（端末の写真）には触らない
+   ・@capacitor/filesystem の EXTERNAL（= getExternalFilesDir）。アプリ専用の場所なので権限は要らない（増やさない）
+   ・Web版（ブラウザ）は何もしない
+   ・since（ミリ秒）を渡したときは、それより前にできた写真だけを消す: 準備のあいだに もう一度「カメラで とる」を押すと、
+     Capacitor が次の写真の入れ物（空の JPEG_….jpg）を先に作る。それまで消すと、次に撮った写真が取り込めないことがある。
+     残ったものは次の取り込みか次の起動で消える */
+function nativeFs(){
+  try{
+    const c = window.Capacitor;
+    if(typeof c.isPluginAvailable === 'function' && !c.isPluginAvailable('Filesystem')) return null;
+    const p = c.Plugins && c.Plugins.Filesystem;
+    return (p && typeof p.readdir === 'function' && typeof p.deleteFile === 'function') ? p : null;
+  }catch(e){ return null; }
+}
+function clearCameraFiles(since){
+  if(!isNativeApp()) return Promise.resolve(0);
+  const fsx = nativeFs();
+  if(!fsx) return Promise.resolve(0);
+  return Promise.resolve()
+    .then(()=> fsx.readdir({ path:'Pictures', directory:'EXTERNAL' }))
+    .then(r=>{
+      const names = ((r && r.files) || [])
+        .filter(f=> !(since && f && typeof f === 'object' && typeof f.mtime === 'number' && f.mtime >= since))   // 準備が始まったあとにできた＝次の写真の入れ物
+        .map(f=> typeof f === 'string' ? f : ((f && f.name) || ''))
+        .filter(n=> /^JPEG_.*\.jpg$/i.test(n));
+      return Promise.all(names.map(n=> Promise.resolve()
+        .then(()=> fsx.deleteFile({ path:'Pictures/' + n, directory:'EXTERNAL' }))
+        .then(()=> 1, ()=> 0)));
+    })
+    .then(a=> a.reduce((s, x)=> s + x, 0))
+    .catch(()=> 0);   // フォルダが無い（まだ撮っていない）などは何もしない
 }
 
 /* ===== サンプル（名画）選択（タイトル・作者は現在の言語で表示） ===== */
@@ -412,11 +467,8 @@ function askBox(msg, done){
   no.textContent = t('no'); yes.textContent = t('yes');
   let closed = false;
   const close = (v)=>{ if(closed) return; closed = true; ov.remove(); done(v); };
-  Tap.bind(no,  ()=> close(false));
+  Tap.bind(no,  ()=> close(false));   // 読み上げ(TalkBack)・キーボードの click も tap.js が受ける（2026-09-30）
   Tap.bind(yes, ()=> close(true));
-  // 読み上げ(TalkBack)・キーボードは click だけを出す（tap.js は pointer だけを見る）ので、この窓の2つは click も受ける
-  no.addEventListener('click',  ()=> close(false));
-  yes.addEventListener('click', ()=> close(true));
   ov.addEventListener('contextmenu', e=> e.preventDefault());
   document.body.appendChild(ov);
   try{ no.focus(); }catch(e){}
@@ -492,7 +544,7 @@ function openGuide(first){
         if(st && st.classList.contains('active')) renderSettings();   // せっていから開いたときは下の画面も訳し直す
         draw();
       };
-      Tap.bind(b, pick); b.addEventListener('click', pick);
+      Tap.bind(b, pick);
       langGrid.appendChild(b);
     });
   }
@@ -524,7 +576,7 @@ function openGuide(first){
     if(i > 0){ i--; draw(); return; }
     if(first) minimizeApp(); else close();              // 初回は閉じずに後ろに下げる（10代の情報室と同じ）
   };
-  const act = (el, fn) => { Tap.bind(el, fn); el.addEventListener('click', fn); };   // 読み上げ(TalkBack)・キーボードは click だけを出すので click も受ける（指の あとから来る click は tap.js が捨てる＝二重にならない）
+  const act = (el, fn) => { Tap.bind(el, fn); };   // 読み上げ(TalkBack)・キーボードの click も tap.js が受ける（2026-09-30。ここで click を足すと二重に進む）
   act(prevB, ()=>{ if(i > 0){ i--; draw(); } });
   act(nextB, ()=>{ if(i < I18N.guide.bodies.length - 1){ i++; draw(); } else close(); });
   draw();
@@ -540,6 +592,7 @@ function init(){
   renderHome();
   renderSamples();
   watchBack();            // Android の戻るボタン（Play版だけ）
+  clearCameraFiles();     // 前に撮ったカメラの写真の残りを消す（Play版だけ・2026-09-30）
 
   Tap.bind(document.getElementById('btnStart'), ()=>{ show('level'); });
   document.querySelectorAll('.lv-btn').forEach(b=>{
@@ -556,11 +609,22 @@ function init(){
   // 見本タップの拡大は beginGame() 内で .pz-ref に都度 Tap.bind する
   // 拡大オーバーレイは「どこを押しても閉じる」を長押しでも保証するため pointerup で無条件に閉じる（Tap.bindだと押し込み移動で閉じられなくなる事故があるため）
   const refZoom = document.getElementById('refZoom');
-  refZoom.addEventListener('pointerup', (e)=>{
-    Tap.markGhost(e);   // とじた下の画面に、このあとの同じ指の click を当てない（tap.js の 👻）
+  let zoomAt = 0;   // pointerup で とじた時刻（直後の click で二重に とじない・はじめない）
+  const zoomTap = ()=>{
     Sound.tap();
     closeRefZoom();
     if(pendingStart){ pendingStart = false; beginGame(); }   // B-1: プレビューを閉じたら本編開始
+  };
+  refZoom.addEventListener('pointerup', (e)=>{
+    zoomAt = Date.now();
+    Tap.markGhost(e);   // とじた下の画面に、このあとの同じ指の click を当てない（tap.js の 👻）
+    zoomTap();
+  });
+  // 読み上げ(TalkBack)・スイッチ操作・キーボード（✕ にフォーカスして Enter）は click だけを出す＝pointerup が来ないので click でも とじる（2026-09-30）
+  refZoom.addEventListener('click', ()=>{
+    if(refZoom.hidden || Date.now() - zoomAt < 700) return;
+    zoomAt = Date.now();
+    zoomTap();
   });
   refZoom.addEventListener('contextmenu', e=> e.preventDefault());
 

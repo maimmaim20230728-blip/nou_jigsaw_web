@@ -618,7 +618,13 @@ function init(){
   refZoom.addEventListener('pointerup', (e)=>{
     zoomAt = Date.now();
     Tap.markGhost(e);   // とじた下の画面に、このあとの同じ指の click を当てない（tap.js の 👻）
-    zoomTap();
+    try{ zoomTap(); }
+    finally{
+      /* ⏱ 同じ指の click は、この処理(パズルの用意)が終わってから届く。700ms を越えると(遅い端末など)時刻が切れて、
+         とじた下の画面に click が当たる(2026-10-01 に確かめた)。処理のあとで時刻を付け直す（tap.js と同じ） */
+      zoomAt = Date.now();
+      Tap.markGhost(e);
+    }
   });
   // 読み上げ(TalkBack)・スイッチ操作・キーボード（✕ にフォーカスして Enter）は click だけを出す＝pointerup が来ないので click でも とじる（2026-09-30）
   refZoom.addEventListener('click', ()=>{

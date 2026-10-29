@@ -18,7 +18,8 @@ function audioCtx(){
 
 /* ===================== 効果音 ===================== */
 const Sound = (() => {
-  let enabled = (localStorage.getItem('soyogi.jigsaw.sound') !== 'off');
+  let enabled = true;
+  try{ enabled = (localStorage.getItem('soyogi.jigsaw.sound') !== 'off'); }catch(e){ /* 保存が使えない環境でも起動する(2026-10-30) */ }
 
   function tone(freq, dur, type='sine', when=0, vol=0.2){
     if(!enabled) return;
@@ -36,7 +37,7 @@ const Sound = (() => {
     get enabled(){ return enabled; },
     toggle(){
       enabled = !enabled;
-      localStorage.setItem('soyogi.jigsaw.sound', enabled ? 'on' : 'off');
+      try{ localStorage.setItem('soyogi.jigsaw.sound', enabled ? 'on' : 'off'); }catch(e){}
       if(enabled) this.tap();
       return enabled;
     },
@@ -51,7 +52,8 @@ const Sound = (() => {
 
 /* ===================== BGM（title / game / history） ===================== */
 const Bgm = (() => {
-  let enabled = (localStorage.getItem('soyogi.jigsaw.bgm') !== 'off');
+  let enabled = true;
+  try{ enabled = (localStorage.getItem('soyogi.jigsaw.bgm') !== 'off'); }catch(e){ /* 保存が使えない環境でも起動する(2026-10-30) */ }
   let bus = null, filter = null, timer = null, step = 0, playing = false, pending = false;
   let mood = 'title';                        // 最初（タイトル）は明るいポップ
 
@@ -185,7 +187,7 @@ const Bgm = (() => {
     start, stop, setMood,
     toggle(){
       enabled = !enabled;
-      localStorage.setItem('soyogi.jigsaw.bgm', enabled ? 'on' : 'off');
+      try{ localStorage.setItem('soyogi.jigsaw.bgm', enabled ? 'on' : 'off'); }catch(e){}
       if(enabled) start(); else stop();
       return enabled;
     },

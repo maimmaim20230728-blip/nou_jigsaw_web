@@ -14,6 +14,7 @@ const PuzzleGame = (() => {
   let doneTimer = null;   // A-3: 完成演出→結果画面へのタイマーID（stopで掃除）
   let stopped = false;    // A-3: stop()で中断済みなら結果画面への遷移を発火させない
   let committed = false;  // 記録の確定（commit）は完成検出の瞬間に1回だけ発火
+  const TAP_MOVE = 36;    // これ以内の動きで離したらタップ（tap.js の MOVE_LIMIT と同じ）
 
   function fmtTime(sec){
     const m = Math.floor(sec/60), s = sec%60;
@@ -72,6 +73,60 @@ const PuzzleGame = (() => {
     }, 1800);
   }
 
+  /* 2つのセルのピースを入れ替える（ドラッグ・タップ2回・ヒント以外の入れ替えはここを通る） */
+  function swapCells(from, to){
+    [perm[from], perm[to]] = [perm[to], perm[from]];
+    moves++;
+    statMoves.textContent = moves;
+    Sound.swap();
+    render();
+    checkDone();
+  }
+
+  /* ---- タップ2回で入れ替え（2026-10-30・ドラッグできない方も遊べるように。ドラッグはそのまま使える） ----
+     1回目のタップでピースを選ぶ（枠 .selected）→ 2回目に別のピースをタップすると入れ替え。同じピースをもう一度で選びなおし。
+     キーボード（Tab・Enter/Space）・読み上げソフト・スイッチの click も同じ道を通る */
+  let selIdx = null;       // いま選んでいるセル（無ければ null）
+  let lastPtrUp = 0;       // 指・マウスで離した時刻（直後に届く click を二重に数えない）
+  function clearSel(){
+    if(selIdx === null) return;
+    const s = boardEl && boardEl.querySelector('.pcell[data-i="'+selIdx+'"]');
+    if(s){ s.classList.remove('selected'); s.setAttribute('aria-pressed', 'false'); }
+    selIdx = null;
+  }
+  function tapCell(i){
+    if(finished) return;
+    if(selIdx === null){
+      selIdx = i;
+      const s = boardEl.querySelector('.pcell[data-i="'+i+'"]');
+      if(s){ s.classList.add('selected'); s.setAttribute('aria-pressed', 'true'); }
+      Sound.tap();
+      return;
+    }
+    if(selIdx === i){ clearSel(); return; }
+    const from = selIdx;
+    clearSel();
+    swapCells(from, i);
+    const c = boardEl.querySelector('.pcell[data-i="'+i+'"]');
+    if(c && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('pcell')){ try{ c.focus(); }catch(e){} }
+  }
+  function attachTap(cell){
+    const i = Number(cell.dataset.i);
+    cell.setAttribute('role', 'button');
+    cell.setAttribute('tabindex', '0');
+    cell.setAttribute('aria-pressed', 'false');
+    cell.setAttribute('aria-label', String(i + 1));   // 場所の番号（左上から 1, 2, 3…）
+    cell.addEventListener('click', ()=>{
+      if(Date.now() - lastPtrUp < 700) return;   // 指・マウスの操作は pointerup で処理済み
+      tapCell(i);
+    });
+    cell.addEventListener('keydown', (e)=>{
+      if(e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      e.preventDefault();
+      tapCell(i);
+    });
+  }
+
   /* ---- ドラッグ&ドロップ（Pointer Events） ---- */
   function attachDrag(cell){
     cell.addEventListener('pointerdown', (ev)=>{
@@ -81,6 +136,7 @@ const PuzzleGame = (() => {
       ev.preventDefault();
       dragPid = ev.pointerId;        // A-2: このドラッグのポインタを固定
       const from = Number(cell.dataset.i);
+      const sx = ev.clientX, sy = ev.clientY;   // タップ(ほとんど動かさない)の見分け用
       const rect = cell.getBoundingClientRect();
 
       // 指に追従する分身（浮き上がって見えるよう少し拡大＋影）
@@ -118,14 +174,12 @@ const PuzzleGame = (() => {
         if(e.pointerId !== dragPid) return;   // A-2: 固定した指の離しだけ処理
         const target = hover;
         cleanup();
+        lastPtrUp = Date.now();
         if(target){
-          const to = Number(target.dataset.i);
-          [perm[from], perm[to]] = [perm[to], perm[from]];
-          moves++;
-          statMoves.textContent = moves;
-          Sound.swap();
-          render();
-          checkDone();
+          clearSel();                          // ドラッグで入れ替えたら、タップの選択は外す
+          swapCells(from, Number(target.dataset.i));
+        } else if(Math.hypot(e.clientX - sx, e.clientY - sy) <= TAP_MOVE){
+          tapCell(from);                       // ほとんど動かさずに離した＝タップ
         }
       };
       const onCancel = (e)=>{
@@ -144,6 +198,7 @@ const PuzzleGame = (() => {
       n = opts.n; imgUrl = opts.img; doneCb = opts.onDone; commitCb = opts.onCommit;
       moves = 0; finished = false; perm = shuffled();
       dragPid = null; stopped = false; committed = false;   // 前回の残りをリセット
+      selIdx = null; lastPtrUp = 0;
       if(doneTimer){ clearTimeout(doneTimer); doneTimer = null; }
 
       container.innerHTML =
@@ -166,6 +221,7 @@ const PuzzleGame = (() => {
         cell.className = 'pcell';
         cell.dataset.i = i;
         attachDrag(cell);
+        attachTap(cell);
         boardEl.appendChild(cell);
       }
       render();
@@ -183,6 +239,7 @@ const PuzzleGame = (() => {
       const wrong = [];
       for(let i=0;i<perm.length;i++){ if(perm[i] !== i) wrong.push(i); }
       if(!wrong.length) return;
+      clearSel();                                                    // タップで選んでいたピースは外す
       const target = wrong[Math.floor(Math.random()*wrong.length)];  // 正解にするセル
       const loc = perm.indexOf(target);                              // ピースtargetが今いるセル
       [perm[target], perm[loc]] = [perm[loc], perm[target]];
@@ -198,6 +255,7 @@ const PuzzleGame = (() => {
     stop(){
       finished = true;
       stopped = true;   // A-3: 完成演出中でも結果画面へ引き戻さない
+      selIdx = null;
       if(timerId){ clearInterval(timerId); timerId = null; }
       if(doneTimer){ clearTimeout(doneTimer); doneTimer = null; }
     },

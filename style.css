@@ -139,6 +139,10 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   box-shadow:0 2px 5px rgba(0,0,0,.25); position:relative; transition:border-radius .5s; }
 .pcell.lifting{ opacity:.35; }
 .pcell.drop-target{ outline:5px solid var(--accent); outline-offset:-2px; z-index:2; }
+/* タップ2回の入れ替え: 1回目に選んだピース（puzzle.js tapCell・2026-10-30）。白い縁＋太い緑の枠で、どの絵の上でも見える */
+.pcell.selected{ outline:6px solid var(--brand); outline-offset:-6px; box-shadow:inset 0 0 0 9px #fff, 0 2px 5px rgba(0,0,0,.25); z-index:2; }
+.pcell:focus-visible{ outline:5px dashed #1A1A1A; outline-offset:-5px; z-index:3; }
+.pcell.selected:focus-visible{ outline:6px solid var(--brand); }
 /* 正しい位置のピースに小さな✓（手がかり） */
 .pcell.placed::after{ content:'✓'; position:absolute; right:5px; bottom:3px;
   font-size:15px; font-weight:900; color:#fff; background:var(--correct);
@@ -371,3 +375,7 @@ html[lang="ja"] .guide-h, html[lang="ja"] .guide-p, html[lang="ko"] .guide-h, ht
   min-height:72px; max-width:540px; padding:10px 22px; font:inherit; font-size:.9em; font-weight:800;
   color:var(--text); cursor:pointer; }
 .guide-again-btn:active,.guide-again-btn.pressing{ background:var(--tap); }
+/* 記録を保存できなかったときの一言（結果画面のいちばん上・2026-10-30） */
+.save-fail{ color:var(--wrong); font-weight:800; border:3px solid var(--wrong); border-radius:14px; padding:10px 14px; margin:0 auto 12px; max-width:540px; background:var(--surface); }
+/* カレンダーの日をキーボードで選んだとき */
+.cal-cell:focus-visible{ outline:4px solid var(--brand); outline-offset:2px; }

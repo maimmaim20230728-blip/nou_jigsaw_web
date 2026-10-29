@@ -1,5 +1,5 @@
 /* Service Worker ― 完全オフライン動作（全ファイルを端末にキャッシュ） */
-const CACHE = 'soyogi-jigsaw-v17';
+const CACHE = 'soyogi-jigsaw-v18';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'audio.js', 'store.js', 'tap.js', 'puzzle.js',
   'data/config.js', 'data/lang.js',
@@ -35,8 +35,11 @@ self.addEventListener('fetch', e=>{
   if(new URL(req.url).origin !== self.location.origin) return;  // 外部originはSW介入しない
   e.respondWith(
     caches.match(req).then(hit=> hit || fetch(req).then(res=>{
-      const copy = res.clone();
-      caches.open(CACHE).then(c=>c.put(req, copy)).catch(()=>{});
+      // 404/503 などの失敗の応答はキャッシュに入れない(2026-10-30)
+      if(res && res.ok){
+        const copy = res.clone();
+        caches.open(CACHE).then(c=>c.put(req, copy)).catch(()=>{});
+      }
       return res;
     }).catch(()=>{
       // オフライン等でネットも失敗: ページ遷移要求ならキャッシュ済みの index.html を殻として返す

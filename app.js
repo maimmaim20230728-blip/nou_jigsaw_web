@@ -24,6 +24,18 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
 }
 
+/* button でない押す場所(カレンダーの日など)を、Tab で届き Enter/Space で押せるようにする。押すと click を出す＝Tap が拾う(2026-10-30) */
+function keyButton(el, label){
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  if(label) el.setAttribute('aria-label', label);
+  el.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    el.click();
+  });
+}
+
 /* ===== 画面切り替え ===== */
 function show(id){
   cancelPick();   // 写真の準備中に画面が変わったら、その準備の続きは捨てる（下の pickFile）
@@ -204,8 +216,8 @@ function beginGame(){
    結果画面への遷移(showResult)とは切り離してここで必ず保存する。 */
 function commitFinish(stats){
   const sample = SAMPLES.find(s=> s.src === curImg);   // サンプル（名画）を完成したら図鑑に登録
-  Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves,
-    sampleId: sample ? sample.id : null });            // 名画のみid保存・写真はnull（後方互換）
+  const saved = !!Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves,
+    sampleId: sample ? sample.id : null });            // 名画のみid保存・写真はnull（後方互換）。保存できなければ false（結果画面で知らせる・2026-10-30）
   let allDone = false;
   if(sample){
     const before = SAMPLES.filter(s=>Store.isDone(s.id)).length;
@@ -213,15 +225,21 @@ function commitFinish(stats){
     const after = SAMPLES.filter(s=>Store.isDone(s.id)).length;
     allDone = (before < SAMPLES.length && after === SAMPLES.length);   // 36/36を今回達成した瞬間だけ
   }
-  pendingResult = { stats, sample, allDone };          // 表示は確定済みのこの値を使う
+  pendingResult = { stats, sample, allDone, saved };   // 表示は確定済みのこの値を使う
 }
 
 /* 1.8秒後の結果画面表示（確定済みの pendingResult を描画するだけ・記録はしない） */
 function showResult(){
   if(!pendingResult) return;
-  const { stats, sample, allDone } = pendingResult;
+  const { stats, sample, allDone, saved } = pendingResult;
   pendingResult = null;
   renderResult(stats, sample, allDone);
+  if(!saved){                                   // 保存できなかったら(容量いっぱい・保存が使えない環境)その場で知らせる(2026-10-30)
+    const msg = document.createElement('div');
+    msg.className = 'save-fail'; msg.setAttribute('role', 'alert');
+    msg.textContent = t('saveFail');
+    document.getElementById('resultBody').prepend(msg);
+  }
   show('result');
 }
 
@@ -391,7 +409,15 @@ function renderRecords(){
       inner += '<div class="cal-badges">'+badges+'</div>';
     }
     cell.innerHTML = inner;
-    if(has) Tap.bind(cell, ()=>{ renderDayDetail(key); });
+    if(has){
+      Tap.bind(cell, ()=>{ renderDayDetail(key); });
+      // キーボード・スイッチでも押せるように。名前は「日付 初級 2 中級 1」(2026-10-30)
+      let label = new Date(calY, calM, day).toLocaleDateString(CUR || undefined, { month:'long', day:'numeric', weekday:'short' });
+      if(c.easy>0) label += ' ' + t('levelEasy') + ' ' + c.easy;
+      if(c.mid>0)  label += ' ' + t('levelMid') + ' ' + c.mid;
+      if(c.hard>0) label += ' ' + t('levelHard') + ' ' + c.hard;
+      keyButton(cell, label);
+    }
     grid.appendChild(cell);
   }
 }
@@ -634,7 +660,11 @@ function init(){
   });
   refZoom.addEventListener('contextmenu', e=> e.preventDefault());
 
-  Tap.bind(document.getElementById('btnQuit'),  ()=>{ PuzzleGame.stop(); renderHome(); show('home'); });
+  // とちゅうの「ホームにもどる」: 戻るボタンと同じく確かめてから（押し間違いで進み具合が消えないように・2026-10-30）。完成したあとは確かめない
+  Tap.bind(document.getElementById('btnQuit'),  ()=>{
+    if(pendingResult){ goHomeFromAnywhere(); return; }
+    askBox(t('quitAsk'), (ok)=>{ if(ok) goHomeFromAnywhere(); });
+  });
   Tap.bind(document.getElementById('btnAgain'), ()=>{ startPuzzle(); });
   Tap.bind(document.getElementById('btnOther'), ()=>{ show('source'); });
 

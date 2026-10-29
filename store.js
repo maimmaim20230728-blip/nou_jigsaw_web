@@ -17,9 +17,13 @@ const Store = (() => {
     try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }
     catch(e){ return {}; }
   }
+  /* 保存できたら true。失敗(容量いっぱい・保存が使えない環境)は false＝既存は保持し、結果画面で知らせる */
   function save(obj){
-    try{ localStorage.setItem(KEY, JSON.stringify(obj)); }catch(e){ /* 保存失敗時も既存は保持 */ }
+    try{ localStorage.setItem(KEY, JSON.stringify(obj)); return true; }catch(e){ return false; }
   }
+  /* 設定の読み書き。保存が使えない環境(サイトデータのブロック等)でも起動を止めない(2026-10-30) */
+  function getItem(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function setItem(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
   function loadDone(){
     try{ const a = JSON.parse(localStorage.getItem(DONE)); return Array.isArray(a) ? a : []; }
     catch(e){ return []; }
@@ -44,7 +48,7 @@ const Store = (() => {
   return {
     keyOf, starsFor,
 
-    /* 1回のパズル完成を今日の記録に追加 */
+    /* 1回のパズル完成を今日の記録に追加。保存できなかったら null(呼び出し側で知らせる) */
     record(session){
       const all = load();
       const day = keyOf(new Date());
@@ -54,8 +58,7 @@ const Store = (() => {
         timeSec:session.timeSec, moves:session.moves,
         sampleId: session.sampleId || null, at: Date.now() });   // B-5: 名画のみid・写真はnull
       all[day] = row;
-      save(all);
-      return row;
+      return save(all) ? row : null;
     },
 
     day(key){ return load()[key] || null; },
@@ -101,9 +104,9 @@ const Store = (() => {
     isDone(id){ return loadDone().indexOf(id) !== -1; },
 
     /* --- 設定 --- */
-    getLang(){ return localStorage.getItem('soyogi.jigsaw.lang') || ''; },
-    setLang(c){ localStorage.setItem('soyogi.jigsaw.lang', c); },
-    getScale(){ return localStorage.getItem('soyogi.jigsaw.scale') || 'M'; },
-    setScale(s){ localStorage.setItem('soyogi.jigsaw.scale', s); },
+    getLang(){ return getItem('soyogi.jigsaw.lang') || ''; },
+    setLang(c){ setItem('soyogi.jigsaw.lang', c); },
+    getScale(){ return getItem('soyogi.jigsaw.scale') || 'M'; },
+    setScale(s){ setItem('soyogi.jigsaw.scale', s); },
   };
 })();

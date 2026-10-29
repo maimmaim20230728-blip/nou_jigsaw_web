@@ -175,22 +175,69 @@ const LANG = {
 /* ---- クレジット（タイトル画面のHPリンク文言・15言語） ---- */
 const CREDITS = {
   ja:'アプリ開発：介護と支援の相談どころ　そよぎ',
-  en:'Developed by Soyogi — Care & Support Consultation',
+  en:'Developed by Soyogi (Care & Support Consultation)',
   zh:'开发：介护与支援咨询处 Soyogi',
   'zh-TW':'開發：介護與支援諮詢處 Soyogi',
   ko:'개발: 돌봄·지원 상담소 Soyogi',
-  es:'Desarrollado por Soyogi — Consultas de cuidado y apoyo',
-  pt:'Desenvolvido pela Soyogi — Consultoria de cuidado e apoio',
-  fr:'Développé par Soyogi — Consultations de soins et de soutien',
-  de:'Entwickelt von Soyogi — Pflege- und Unterstützungsberatung',
-  it:'Sviluppato da Soyogi — Consulenza per cura e supporto',
-  nl:'Ontwikkeld door Soyogi — Zorg- en ondersteuningsadvies',
-  pl:'Opracowane przez Soyogi — poradnia opieki i wsparcia',
-  ru:'Разработано Soyogi — консультации по уходу и поддержке',
-  tr:'Geliştiren: Soyogi — Bakım ve destek danışmanlığı',
+  es:'Desarrollado por Soyogi (Consultas de cuidado y apoyo)',
+  pt:'Desenvolvido pela Soyogi (Consultoria de cuidado e apoio)',
+  fr:'Développé par Soyogi (Consultations de soins et de soutien)',
+  de:'Entwickelt von Soyogi (Pflege- und Unterstützungsberatung)',
+  it:'Sviluppato da Soyogi (Consulenza per cura e supporto)',
+  nl:'Ontwikkeld door Soyogi (Zorg- en ondersteuningsadvies)',
+  pl:'Opracowane przez Soyogi (poradnia opieki i wsparcia)',
+  ru:'Разработано Soyogi (консультации по уходу и поддержке)',
+  tr:'Geliştiren: Soyogi (Bakım ve destek danışmanlığı)',
   hi:'विकसित: देखभाल और सहायता परामर्श केंद्र Soyogi',
 };
 Object.keys(CREDITS).forEach(k=>{ if(LANG[k]) LANG[k].ui.credit = CREDITS[k]; });
+
+/* ---- パズルの案内（ドラッグ＋タップ2回で入れ替え・15言語・2026-10-30） ----
+   ・INSTRUCT_TAP = パズル画面の上の一言（ui.instructPuzzle を上書き）
+   ・TAPSWAP = 「パズルの あそびかた」(guide.bodies[3]) の2行目のあとに足す一文（下の GUIDE の割り当ての前で差し込む） */
+const INSTRUCT_TAP = {
+  ja:'ピースを ドラッグするか、2まい タップして いれかえてね',
+  en:'Drag a piece, or tap two pieces, to swap them',
+  zh:'拖动拼图块，或先后点两块，进行交换',
+  'zh-TW':'拖曳拼圖塊，或先後點兩塊，進行交換',
+  ko:'조각을 드래그하거나 두 조각을 차례로 눌러 바꿔보세요',
+  es:'Arrastra una pieza o toca dos para intercambiarlas',
+  pt:'Arraste uma peça ou toque em duas para trocá-las',
+  fr:'Faites glisser une pièce ou touchez-en deux pour les échanger',
+  de:'Ziehe ein Teil oder tippe zwei an, um sie zu tauschen',
+  it:'Trascina un pezzo o tocca due pezzi per scambiarli',
+  nl:'Sleep een stukje of tik op twee stukjes om ze te wisselen',
+  pl:'Przeciągnij element lub dotknij dwóch, aby je zamienić',
+  ru:'Перетащите деталь или нажмите на две, чтобы поменять их местами',
+  tr:'Değiştirmek için bir parçayı sürükleyin ya da iki parçaya dokunun',
+  hi:'बदलने के लिए टुकड़े को खींचें या दो टुकड़ों को छुएँ',
+};
+Object.keys(INSTRUCT_TAP).forEach(k=>{ if(LANG[k]) LANG[k].ui.instructPuzzle = INSTRUCT_TAP[k]; });
+const TAPSWAP = {
+  ja:'ピースを 1まい タップして（わくが つきます）、つぎに もう1まい タップしても、2まいが 入れかわります。',
+  en:'You can also tap one piece (a frame appears) and then another to swap them.',
+  zh:'也可以先点一块（会出现边框），再点另一块来交换。',
+  'zh-TW':'也可以先點一塊（會出現邊框），再點另一塊來交換。',
+  ko:'조각 하나를 누르고(테두리가 생깁니다) 다른 조각을 눌러도 서로 바뀝니다.',
+  es:'También puedes tocar una pieza (aparece un marco) y luego otra para intercambiarlas.',
+  pt:'Você também pode tocar em uma peça (aparece uma moldura) e depois em outra para trocá-las.',
+  fr:'Vous pouvez aussi toucher une pièce (un cadre apparaît), puis une autre, pour les échanger.',
+  de:'Sie können auch ein Teil antippen (es bekommt einen Rahmen) und dann ein anderes, um die beiden zu tauschen.',
+  it:'Puoi anche toccare un pezzo (compare una cornice) e poi un altro per scambiarli.',
+  nl:'Je kunt ook op een stukje tikken (er komt een kader omheen) en daarna op een ander om ze te wisselen.',
+  pl:'Możesz też dotknąć jednego elementu (pojawi się ramka), a potem drugiego, aby je zamienić.',
+  ru:'Можно также нажать на одну деталь (появится рамка), а потом на другую, чтобы поменять их местами.',
+  tr:'Bir parçaya dokunup (etrafında çerçeve çıkar) sonra başka birine dokunarak da yerlerini değiştirebilirsiniz.',
+  hi:'एक टुकड़े को छूएँ (उस पर फ्रेम आ जाएगा), फिर दूसरे को छूएँ; इससे भी दोनों बदल जाते हैं।',
+};
+
+/* ---- 記録を保存できなかったときの一言（結果画面・15言語・2026-10-30） ---- */
+const SAVEFAIL = {
+  ja:'きろくを ほぞんできませんでした', en:'Could not save this record', zh:'无法保存记录', 'zh-TW':'無法儲存紀錄', ko:'기록을 저장하지 못했어요',
+  es:'No se pudo guardar el registro', pt:'Não foi possível salvar o registro', fr:'Impossible d’enregistrer l’historique', de:'Der Eintrag konnte nicht gespeichert werden', it:'Impossibile salvare il risultato',
+  nl:'Het record kon niet worden opgeslagen', pl:'Nie udało się zapisać wyniku', ru:'Не удалось сохранить запись', tr:'Kayıt kaydedilemedi', hi:'रिकॉर्ड सेव नहीं हो सका',
+};
+Object.keys(SAVEFAIL).forEach(k=>{ if(LANG[k]) LANG[k].ui.saveFail = SAVEFAIL[k]; });
 
 /* ---- 「おんがく（BGM）」ラベル（15言語） ---- */
 const MUSIC = {
@@ -802,6 +849,11 @@ const GUIDE = {
       "होम स्क्रीन के ऊपर दाईं ओर “सेटिंग्स” में “भाषा”, “अक्षर का आकार”, “ध्वनि” और “संगीत” बदल सकते हैं।\nयह गाइड कभी भी “सेटिंग्स” में “कैसे खेलें, फिर से देखें” से दोबारा देख सकते हैं।"
     ] },
 };
+/* 「パズルの あそびかた」の2行目(ドラッグの説明)のあとに、タップ2回の一文を足す(上の TAPSWAP・2026-10-30) */
+Object.keys(GUIDE).forEach(k=>{
+  const b = GUIDE[k].bodies, ls = String(b[3]).split('\n');
+  if(TAPSWAP[k] && ls.indexOf(TAPSWAP[k]) < 0){ ls.splice(2, 0, TAPSWAP[k]); b[3] = ls.join('\n'); }
+});
 Object.keys(LANG).forEach(k=>{
   LANG[k].guide = GUIDE[k];
   LANG[k].ui.guideTitle = GUIDE[k].title;   // せっていの見出し

@@ -1,7 +1,8 @@
 /* =========================================================
    記録の保存 ― localStorage（端末内・サーバー通信なし）
    records[YYYY-MM-DD] = { sessions:[ {level,pieces,timeSec,moves,at} ] }
-   ・level … 'easy'（初級）/ 'mid'（中級）/ 'hard'（上級）
+   ・level … 'easy'（初級4）/ 'easy6'（初級6・2×3）/ 'mid'（中級）/ 'hard'（上級）
+   ・hints … ヒントを使った回数（2026-11-11〜。古い記録には無い＝不明として「ヒントなし」の印は付けない）
 
    ▼永続性（オフライン・アプリ更新後も保持）の設計
    ・記録は localStorage（キー 'soyogi.jigsaw.records'）に保存。localStorageは
@@ -56,7 +57,9 @@ const Store = (() => {
       if(!row.sessions) row.sessions = [];
       row.sessions.push({ level:session.level, pieces:session.pieces,
         timeSec:session.timeSec, moves:session.moves,
-        sampleId: session.sampleId || null, at: Date.now() });   // B-5: 名画のみid・写真はnull
+        sampleId: session.sampleId || null,
+        hints: (typeof session.hints === 'number') ? session.hints : undefined,   // 古い版の記録には無い
+        at: Date.now() });   // B-5: 名画のみid・写真はnull
       all[day] = row;
       return save(all) ? row : null;
     },
@@ -65,9 +68,15 @@ const Store = (() => {
 
     /* その日の難易度別プレイ回数 */
     counts(key){
-      const r = load()[key]; const c = { easy:0, mid:0, hard:0 };
+      const r = load()[key]; const c = { easy:0, easy6:0, mid:0, hard:0 };
       if(r && r.sessions) r.sessions.forEach(s => { if(c[s.level] !== undefined) c[s.level]++; });
       return c;
+    },
+
+    /* その日に「ヒントなし」で完成した回があるか（hints が 0 と記録されたものだけ。古い記録は数えない） */
+    hasNoHint(key){
+      const r = load()[key];
+      return !!(r && r.sessions && r.sessions.some(s=> s.hints === 0));
     },
 
     /* その日の最高成績（星 1〜3・記録なしは0） */
@@ -89,6 +98,8 @@ const Store = (() => {
     streak(){
       const all = load();
       let n = 0; const d = new Date();
+      // 今日まだ遊んでいなくても、昨日までの続いた日数を数える（0 に戻って見えないように・2026-11-11）
+      if(!all[keyOf(d)]) d.setDate(d.getDate()-1);
       while(true){
         if(all[keyOf(d)]){ n++; d.setDate(d.getDate()-1); } else break;
       }

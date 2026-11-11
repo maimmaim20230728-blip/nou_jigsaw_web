@@ -24,10 +24,12 @@ const LANGS = [
 
 /* ---- 難易度（ピース数＝縦横の分割数の2乗） ----
    星の基準は「速く・手数少なく」を目安にしたゆるい目安（対戦要素ではない） */
+/* cols×rows＝割り方。初級6(2×3)は初級4と中級9のあいだの段(長方形のピース・2026-11-11) */
 const LEVELS = [
-  { id:'easy', n:2, pieces:4,  starSec:[20,40] },
-  { id:'mid',  n:3, pieces:9,  starSec:[60,120] },
-  { id:'hard', n:4, pieces:16, starSec:[120,240] },
+  { id:'easy',  n:2, cols:2, rows:2, pieces:4,  starSec:[20,40] },
+  { id:'easy6', n:2, cols:2, rows:3, pieces:6,  starSec:[40,80] },
+  { id:'mid',   n:3, cols:3, rows:3, pieces:9,  starSec:[60,120] },
+  { id:'hard',  n:4, cols:4, rows:4, pieces:16, starSec:[120,240] },
 ];
 
 /* ---- サンプル画像（パブリックドメインの名画36点・Wikimedia Commonsの忠実複製より） ----

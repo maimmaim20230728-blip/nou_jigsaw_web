@@ -47,6 +47,10 @@
       <span class="lv-name" data-i18n="levelEasy">初級</span>
       <span class="lv-sub"><span class="lv-grid g2">▦</span> 4 <span data-i18n="pieceUnit">ピース</span></span>
     </button>
+    <button class="big-btn lv-btn lv-e6" data-level="easy6">
+      <span class="lv-name" data-i18n="levelEasy6">初中級</span>
+      <span class="lv-sub"><span class="lv-grid g2x3">▦</span> 6 <span data-i18n="pieceUnit">ピース</span></span>
+    </button>
     <button class="big-btn lv-btn lv-mid" data-level="mid">
       <span class="lv-name" data-i18n="levelMid">中級</span>
       <span class="lv-sub"><span class="lv-grid g3">▦</span> 9 <span data-i18n="pieceUnit">ピース</span></span>
@@ -90,6 +94,7 @@
   <section id="result" class="screen">
     <div class="result-title" data-i18n="wellDone">かんせい！</div>
     <div id="resultBody"></div>
+    <button id="btnNextArt" class="big-btn next-art-btn" data-i18n="nextArt" style="display:none">つぎの 名画</button>
     <button id="btnAgain" class="big-btn" data-i18n="again">もういちど</button>
     <button id="btnOther" class="big-btn other-btn" data-i18n="otherPhoto">べつの しゃしんで</button>
     <button class="link-back" data-home data-i18n="back">ホームにもどる</button>
@@ -127,6 +132,7 @@
     <div id="calGrid" class="cal-grid"></div>
     <div class="cal-legend">
       <span class="lg e"></span><span class="lg-t" data-i18n="levelEasy">初級</span>
+      <span class="lg s"></span><span class="lg-t" data-i18n="levelEasy6">初中級</span>
       <span class="lg m"></span><span class="lg-t" data-i18n="levelMid">中級</span>
       <span class="lg h"></span><span class="lg-t" data-i18n="levelHard">上級</span>
     </div>
@@ -139,6 +145,7 @@
     <div id="refZoomLabel" class="ref-zoom-label" hidden></div>
     <button id="refZoomClose" class="ref-zoom-close" aria-label="close">✕</button>
     <img id="refZoomImg" class="ref-zoom-img" src="" alt="">
+    <div id="refZoomArt" class="ref-zoom-art" hidden><div class="rza-title"></div><div class="rza-artist"></div></div>
   </div>
 
   <!-- スクリプト（順番が大事） -->

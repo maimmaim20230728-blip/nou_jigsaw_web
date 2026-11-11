@@ -12,6 +12,8 @@
   --accent-dark:#B45309;
   --mid:#1E88E5;        /* 中級＝青 */
   --mid-dark:#1565C0;
+  --six:#7B1FA2;        /* 初中級6ピース＝紫（初級・中級・上級の3色と区別） */
+  --six-dark:#4A148C;
   --correct:#2E7D32;
   --wrong:#C62828;
   --tap:#E8F5E9;
@@ -84,8 +86,11 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .lv-grid{ font-size:1.5em; line-height:1; }
 .lv-easy{ background:var(--accent); box-shadow:0 6px 0 var(--accent-dark); }  /* 初級＝オレンジ（そよぎの「いつもの」と同じ） */
 .lv-easy:active, .lv-easy.pressing{ box-shadow:0 2px 0 var(--accent-dark); }
+.lv-e6{ background:var(--six); box-shadow:0 6px 0 var(--six-dark); }   /* 初中級＝紫 */
+.lv-e6:active, .lv-e6.pressing{ box-shadow:0 2px 0 var(--six-dark); }
 .lv-mid{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); }
 .lv-mid:active, .lv-mid.pressing{ box-shadow:0 2px 0 var(--mid-dark); }
+.lv-name{ min-width:0; overflow-wrap:anywhere; }
 .lv-hard{ background:var(--brand); box-shadow:0 6px 0 var(--brand-dark); }    /* 上級＝緑（そよぎの「むずかしい」と同じ） */
 .lv-hard:active, .lv-hard.pressing{ box-shadow:0 2px 0 var(--brand-dark); }
 
@@ -193,6 +198,13 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
   line-height:1.35; padding:10px 18px; border-radius:16px;
   background:rgba(0,0,0,.55); box-shadow:0 4px 16px rgba(0,0,0,.4); z-index:81; }
 .ref-zoom-label[hidden]{ display:none; }
+/* はじめる前の完成図の下に、名画の作品名と作者（小さく） */
+.ref-zoom-art{ position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom, 0px)); max-width:88vw; text-align:center; color:#fff;
+  padding:6px 16px; border-radius:14px; background:rgba(0,0,0,.55); z-index:81; line-height:1.3; }
+.ref-zoom-art[hidden]{ display:none; }
+.rza-title{ font-size:.85em; font-weight:800; }
+.rza-artist{ font-size:.65em; font-weight:700; opacity:.9; }
 
 /* ========== 結果 ========== */
 .result-title{ font-size:1.8em; font-weight:900; color:var(--brand-dark); margin-bottom:10px; }
@@ -208,7 +220,10 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .rn{ display:flex; flex-direction:column; gap:2px; }
 .rn-cap{ font-size:.72em; color:#666; font-weight:700; }
 .rn b{ font-size:1.6em; font-weight:900; color:var(--brand-dark); }
+.result-kind{ font-size:1em; font-weight:800; color:var(--brand-dark); margin:0 0 6px; }   /* 星1つのとき「最後までできました」 */
 .streak{ font-size:1.1em; margin-bottom:14px; }
+.next-art-btn{ background:var(--accent); box-shadow:0 6px 0 var(--accent-dark); }   /* つぎの名画（名画のときだけ） */
+.next-art-btn:active, .next-art-btn.pressing{ box-shadow:0 2px 0 var(--accent-dark); }
 .other-btn{ background:var(--mid); box-shadow:0 6px 0 var(--mid-dark); min-height:88px; font-size:1.1em; }
 .other-btn:active, .other-btn.pressing{ box-shadow:0 2px 0 var(--mid-dark); }
 
@@ -298,12 +313,13 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .badge{ font-size:.68em; font-weight:800; color:#fff; min-width:21px; height:21px; line-height:21px;
   border-radius:11px; padding:0 5px; text-align:center; }
 .badge.e{ background:var(--accent); }   /* 初級＝オレンジ */
+.badge.s{ background:var(--six); }      /* 初中級＝紫 */
 .badge.m{ background:var(--mid); }      /* 中級＝青 */
 .badge.h{ background:var(--brand); }    /* 上級＝緑 */
 
 .cal-legend{ display:flex; align-items:center; justify-content:center; gap:6px; margin:14px auto 4px; font-size:.78em; color:#555; }
 .lg{ width:15px; height:15px; border-radius:8px; display:inline-block; }
-.lg.e{ background:var(--accent); } .lg.m{ background:var(--mid); } .lg.h{ background:var(--brand); }
+.lg.e{ background:var(--accent); } .lg.s{ background:var(--six); } .lg.m{ background:var(--mid); } .lg.h{ background:var(--brand); }
 .lg-t{ margin-right:12px; }
 
 .day-detail{ width:100%; max-width:520px; margin:4px auto 0; }
@@ -312,9 +328,11 @@ h2{ font-size:1.3em; font-weight:900; color:var(--brand-dark); margin:0 0 18px; 
 .dd-row{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
 .dd-head{ display:flex; align-items:center; gap:10px; }
 .dd-mode{ font-size:.72em; font-weight:800; color:#fff; padding:3px 12px; border-radius:12px; }
-.dd-mode.e{ background:var(--accent); } .dd-mode.m{ background:var(--mid); } .dd-mode.h{ background:var(--brand); }
+.dd-mode.e{ background:var(--accent); } .dd-mode.s{ background:var(--six); } .dd-mode.m{ background:var(--mid); } .dd-mode.h{ background:var(--brand); }
 .dd-score{ font-size:1.05em; font-weight:900; color:var(--text); }
 .dd-stars{ margin-left:auto; font-size:1em; }
+.dd-nohint{ font-size:.72em; font-weight:800; color:var(--brand-dark); margin-top:5px; }   /* 「ヒントなし」の小さな印（使った回は何も出さない） */
+.cal-nh{ font-size:.6em; color:var(--brand); margin-left:2px; vertical-align:top; }
 .dd-art{ font-size:.78em; font-weight:700; color:#777; margin-top:6px; }   /* 名画idのある記録に作品名 */
 
 /* ===================== 確かめの窓（Play版の戻るボタン・2026-09-30） ===================== */

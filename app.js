@@ -191,8 +191,19 @@ function startPuzzle(){
   pendingStart = true;
   const label = document.getElementById('refZoomLabel');
   if(label){ label.textContent = t('makeThis'); label.hidden = false; }   // プレビュー時のみ案内ラベルを出す
+  // 名画のときは作品名と作者を小さく添える（回想・話のきっかけに・2026-11-11）。写真のときは何も出さない
+  const sm = SAMPLES.find(s=> s.src === curImg);
+  const art = I18N.art || LANG.en.art;
+  setRefZoomArt(sm ? (art[sm.id] || '') : '', sm ? (art[sm.artist] || '') : '');
   document.getElementById('refZoomImg').src = curImg;
   document.getElementById('refZoom').hidden = false;
+}
+function setRefZoomArt(title, artist){
+  const box = document.getElementById('refZoomArt');
+  if(!box) return;
+  box.querySelector('.rza-title').textContent = title || '';
+  box.querySelector('.rza-artist').textContent = artist || '';
+  box.hidden = !title;
 }
 
 let pendingResult = null;   // 完成コミット時に確定した結果（1.8秒後の結果画面表示で使う）
@@ -202,7 +213,7 @@ function beginGame(){
   pendingResult = null;
   show('game');
   PuzzleGame.start(document.querySelector('#game .g-body'), {
-    img: curImg, n: curLevel.n,
+    img: curImg, cols: curLevel.cols, rows: curLevel.rows,
     onCommit: (stats)=> commitFinish(stats),   // 完成検出の瞬間＝記録の確定
     onDone:   ()=> showResult(),               // 1.8秒後＝結果画面への遷移のみ
   });
@@ -216,7 +227,7 @@ function beginGame(){
    結果画面への遷移(showResult)とは切り離してここで必ず保存する。 */
 function commitFinish(stats){
   const sample = SAMPLES.find(s=> s.src === curImg);   // サンプル（名画）を完成したら図鑑に登録
-  const saved = !!Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves,
+  const saved = !!Store.record({ level:curLevel.id, pieces:curLevel.pieces, timeSec:stats.timeSec, moves:stats.moves, hints:stats.hints,
     sampleId: sample ? sample.id : null });            // 名画のみid保存・写真はnull（後方互換）。保存できなければ false（結果画面で知らせる・2026-10-30）
   let allDone = false;
   if(sample){
@@ -247,6 +258,7 @@ function showResult(){
 function openRefZoom(src){
   const label = document.getElementById('refZoomLabel');
   if(label){ label.hidden = true; label.textContent = ''; }   // 途中の見本拡大では案内ラベルを出さない
+  setRefZoomArt('', '');                                         // 作品名は はじめる前の完成図だけ
   document.getElementById('refZoomImg').src = src;
   document.getElementById('refZoom').hidden = false;
 }
@@ -255,6 +267,7 @@ function closeRefZoom(){
   document.getElementById('refZoomImg').src = '';
   const label = document.getElementById('refZoomLabel');
   if(label){ label.hidden = true; label.textContent = ''; }
+  setRefZoomArt('', '');
 }
 
 /* ===== 結果画面 ===== */
@@ -272,6 +285,7 @@ function renderResult(stats, sample, allDone){
   const el = document.getElementById('resultBody');
   el.innerHTML =
     '<div class="stars">'+starHtml+'</div>' +
+    (stars === 1 ? '<div class="result-kind">'+t('doneAll')+'</div>' : '') +   // 星1つでも「最後までできました」（ゆっくり遊ぶ人を下げない・2026-11-11）
     '<img class="result-photo" src="'+curImg+'" alt="">' +
     artHtml +
     (allDone ? '<div class="result-trophy" aria-hidden="true">🏆</div>' : '') +   // B-3: コレクション完成の控えめな祝い
@@ -281,6 +295,21 @@ function renderResult(stats, sample, allDone){
     '</div>' +
     '<div class="streak">🔥 '+Store.streak()+'</div>';
   makeConfetti(el, stars>=2);
+  // 名画のとき、まだ完成していない作品が残っていれば「つぎの名画」を出す
+  nextArtSample = sample ? findNextArt(sample) : null;
+  const nb = document.getElementById('btnNextArt');
+  if(nb) nb.style.display = nextArtSample ? '' : 'none';
+}
+
+/* つぎの名画: 今の作品の次から順に、まだ ✓ の無いもの（いちばん後ろまで行ったら先頭へ） */
+let nextArtSample = null;
+function findNextArt(cur){
+  const i = SAMPLES.indexOf(cur);
+  for(let k = 1; k < SAMPLES.length; k++){
+    const s = SAMPLES[(i + k) % SAMPLES.length];
+    if(!Store.isDone(s.id)) return s;
+  }
+  return null;
 }
 
 /* 紙吹雪（星2つ以上で盛大に） */
@@ -395,15 +424,17 @@ function renderRecords(){
   for(let day=1; day<=days; day++){
     const key = Store.keyOf(new Date(calY, calM, day));
     const c = Store.counts(key);
-    const has = (c.easy + c.mid + c.hard) > 0;
+    const has = (c.easy + c.easy6 + c.mid + c.hard) > 0;
     const cell = document.createElement('div');
     cell.className = 'cal-cell' + (has?' has':'') + (key===todayKey?' today':'');
-    let inner = '<div class="cal-num">'+day+'</div>';
+    const noHint = has && Store.hasNoHint(key);   // その日に「ヒントなし」で完成した回がある
+    let inner = '<div class="cal-num">'+day+(noHint ? '<span class="cal-nh" aria-hidden="true">✦</span>' : '')+'</div>';
     if(has){
       const best = Store.bestStars(key);
       inner += '<div class="cal-stars">'+ (best>0 ? '★'.repeat(best) : '') +'</div>';
       let badges = '';
       if(c.easy>0) badges += '<span class="badge e">'+c.easy+'</span>';
+      if(c.easy6>0) badges += '<span class="badge s">'+c.easy6+'</span>';
       if(c.mid>0)  badges += '<span class="badge m">'+c.mid+'</span>';
       if(c.hard>0) badges += '<span class="badge h">'+c.hard+'</span>';
       inner += '<div class="cal-badges">'+badges+'</div>';
@@ -414,8 +445,10 @@ function renderRecords(){
       // キーボード・スイッチでも押せるように。名前は「日付 初級 2 中級 1」(2026-10-30)
       let label = new Date(calY, calM, day).toLocaleDateString(CUR || undefined, { month:'long', day:'numeric', weekday:'short' });
       if(c.easy>0) label += ' ' + t('levelEasy') + ' ' + c.easy;
+      if(c.easy6>0) label += ' ' + t('levelEasy6') + ' ' + c.easy6;
       if(c.mid>0)  label += ' ' + t('levelMid') + ' ' + c.mid;
       if(c.hard>0) label += ' ' + t('levelHard') + ' ' + c.hard;
+      if(noHint)   label += ' ' + t('noHint');
       keyButton(cell, label);
     }
     grid.appendChild(cell);
@@ -428,8 +461,8 @@ function renderDayDetail(key){
   if(!data || !data.sessions || !data.sessions.length){
     el.innerHTML = '<div class="dd-title">'+title+'</div><div class="dd-none">'+t('noRecord')+'</div>'; return;
   }
-  const lname = { easy:t('levelEasy'), mid:t('levelMid'), hard:t('levelHard') };
-  const lcls  = { easy:'e', mid:'m', hard:'h' };
+  const lname = { easy:t('levelEasy'), easy6:t('levelEasy6'), mid:t('levelMid'), hard:t('levelHard') };
+  const lcls  = { easy:'e', easy6:'s', mid:'m', hard:'h' };
   const art   = I18N.art || LANG.en.art;
   let html = '<div class="dd-title">'+title+'</div>';
   data.sessions.forEach(s=>{
@@ -441,7 +474,8 @@ function renderDayDetail(key){
       '<span class="dd-mode '+(lcls[s.level]||'e')+'">'+(lname[s.level]||s.level)+' '+s.pieces+'</span>'+
       '<span class="dd-score">'+m+':'+String(sec).padStart(2,'0')+' / '+s.moves+'</span>'+
       '<span class="dd-stars">'+'⭐'.repeat(stars)+'</span></div>'+
-      (artName ? '<div class="dd-art">'+artName+'</div>' : '')+'</div>';
+      (artName ? '<div class="dd-art">'+artName+'</div>' : '')+
+      (s.hints === 0 ? '<div class="dd-nohint">✦ '+t('noHint')+'</div>' : '')+'</div>';
   });
   el.innerHTML = html;
 }
@@ -667,6 +701,7 @@ function init(){
   });
   Tap.bind(document.getElementById('btnAgain'), ()=>{ startPuzzle(); });
   Tap.bind(document.getElementById('btnOther'), ()=>{ show('source'); });
+  Tap.bind(document.getElementById('btnNextArt'), ()=>{ if(nextArtSample){ curImg = nextArtSample.src; startPuzzle(); } });   // つぎの名画（同じむずかしさで）
 
   Tap.bind(document.getElementById('btnGear'),  ()=>{ renderSettings(); show('settings'); });
   Tap.bind(document.getElementById('btnRecords'), ()=>{ openRecords(); });

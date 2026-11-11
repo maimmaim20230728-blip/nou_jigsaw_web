@@ -7,7 +7,8 @@
    ========================================================= */
 const PuzzleGame = (() => {
   let perm = [];          // perm[セル位置] = そこに置かれているピース番号
-  let n = 3, imgUrl = '';
+  let cols = 3, rows = 3, imgUrl = '';   // 横の列数・縦の段数（6ピースは 2×3 の長方形）
+  let hints = 0;          // ヒントを使った回数（記録カレンダーの「ヒントなし」の印用）
   let moves = 0, startAt = 0, timerId = null, finished = false;
   let boardEl = null, statTime = null, statMoves = null, doneCb = null, commitCb = null;
   let dragPid = null;     // A-2: いま掴んでいる指(pointerId)。1本だけ受け付けマルチタッチ混線を防ぐ
@@ -23,7 +24,7 @@ const PuzzleGame = (() => {
 
   /* 解けた状態で始まらないようシャッフル（入れ替え式はどの並びでも必ず解ける） */
   function shuffled(){
-    const a = Array.from({length:n*n}, (_,i)=>i);
+    const a = Array.from({length:cols*rows}, (_,i)=>i);
     do{
       for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
     }while(a.every((v,i)=>v===i));
@@ -33,10 +34,10 @@ const PuzzleGame = (() => {
   /* 画像本体は盤面のCSS変数(--pz-img)に1回だけ設定し、各ピースは表示位置だけ持つ
      （dataURLが大きくても重複せず軽い） */
   function pieceBg(el, piece){
-    const col = piece % n, row = Math.floor(piece / n);
+    const col = piece % cols, row = Math.floor(piece / cols);
     el.style.backgroundImage = 'var(--pz-img)';
-    el.style.backgroundSize = (n*100)+'% '+(n*100)+'%';
-    el.style.backgroundPosition = (n>1 ? (col/(n-1)*100) : 0)+'% '+(n>1 ? (row/(n-1)*100) : 0)+'%';
+    el.style.backgroundSize = (cols*100)+'% '+(rows*100)+'%';
+    el.style.backgroundPosition = (cols>1 ? (col/(cols-1)*100) : 0)+'% '+(rows>1 ? (row/(rows-1)*100) : 0)+'%';
   }
 
   function render(){
@@ -61,7 +62,7 @@ const PuzzleGame = (() => {
 
     // 記録の確定は完成検出のこの瞬間に即実行（1回だけ）。
     // 完成演出中(1.8秒)に離脱しても記録・図鑑✓が残るよう、遷移(doneCb)より前に必ずコミットする。
-    if(commitCb && !committed){ committed = true; commitCb({ timeSec, moves }); }
+    if(commitCb && !committed){ committed = true; commitCb({ timeSec, moves, hints }); }
 
     // 隙間を消して1枚の絵に戻す完成演出
     boardEl.classList.add('done');
@@ -193,9 +194,9 @@ const PuzzleGame = (() => {
   }
 
   return {
-    /* opts = { img:dataURL/URL, n:分割数, onDone(stats) } */
+    /* opts = { img:dataURL/URL, cols, rows（または n：縦横とも n）, onDone(stats) } */
     start(container, opts){
-      n = opts.n; imgUrl = opts.img; doneCb = opts.onDone; commitCb = opts.onCommit;
+      cols = opts.cols || opts.n; rows = opts.rows || opts.n; hints = 0; imgUrl = opts.img; doneCb = opts.onDone; commitCb = opts.onCommit;
       moves = 0; finished = false; perm = shuffled();
       dragPid = null; stopped = false; committed = false;   // 前回の残りをリセット
       selIdx = null; lastPtrUp = 0;
@@ -209,14 +210,14 @@ const PuzzleGame = (() => {
             '<div class="pz-stat"><span class="pz-cap" data-i18n="movesLabel">'+t('movesLabel')+'</span><b id="pzMoves">0</b></div>' +
           '</div>' +
         '</div>' +
-        '<div class="pz-board" id="pzBoard" style="grid-template-columns:repeat('+n+',1fr)"></div>';
+        '<div class="pz-board" id="pzBoard" style="grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr)"></div>';
 
       boardEl = container.querySelector('#pzBoard');
       boardEl.addEventListener('contextmenu', e=> e.preventDefault());  // ピース長押しでOSメニューを出さない
       boardEl.style.setProperty('--pz-img', 'url("'+imgUrl+'")');
       statTime = container.querySelector('#pzTime');
       statMoves = container.querySelector('#pzMoves');
-      for(let i=0;i<n*n;i++){
+      for(let i=0;i<cols*rows;i++){
         const cell = document.createElement('div');
         cell.className = 'pcell';
         cell.dataset.i = i;
@@ -243,7 +244,7 @@ const PuzzleGame = (() => {
       const target = wrong[Math.floor(Math.random()*wrong.length)];  // 正解にするセル
       const loc = perm.indexOf(target);                              // ピースtargetが今いるセル
       [perm[target], perm[loc]] = [perm[loc], perm[target]];
-      moves++; statMoves.textContent = moves;
+      moves++; statMoves.textContent = moves; hints++;
       Sound.swap();
       render();
       const fixed = boardEl.querySelector('.pcell[data-i="'+target+'"]');
